@@ -3,27 +3,35 @@ import numpy as np
 
 tf.random.set_seed(42)
 
-# Features
-X = np.array([-7.0, -4.0, -1.0, 2.0, 5.0, 8.0, 11.0, 14.0])
+X = tf.range(-100, 100, 4)
 
-# Labels
-y = np.array([3.0, 6.0, 9.0, 12.0, 15.0, 18.0, 21.0, 24.0])
+y = X + 10
 
-# 1. Create the model using sequential API
 model = tf.keras.Sequential([
+    tf.keras.layers.Dense(100, activation="relu"),
+    tf.keras.layers.Dense(100, activation="relu"),
+    tf.keras.layers.Dense(100, activation="relu"),
     tf.keras.layers.Dense(1)
 ])
 
-# 2. Compile the model (mae -> mean absolute error, SGD -> stochastic gradient descent)
 model.compile(loss=tf.keras.losses.mae,
-              optimizer=tf.keras.optimizers.SGD(),
+              optimizer=tf.keras.optimizers.Adam(learning_rate = 0.0001),
               metrics=["mae"])
 
-# 3. Fit the model (5 chances)
-model.fit(tf.expand_dims(X, axis=-1), y, epochs=5)
+model.fit(tf.expand_dims(X, axis=-1), y, epochs=100)
 
-# 4. Test the accuracy of the model's output
 y_pred = model.predict(np.array([16.0]))
 print(y_pred)
 
-# The accuracy of the model at this point is not good at all
+''' 
+Common ways to improve a model (changing hyperparameters):
+    1. Changing the learning rate
+    2. Fitting on more data and for longer duration
+    3. Changing the optimization function
+    4. Adding layers
+    5. Increasing the number of hidden units
+    6. Changing the activation function
+
+    Parameters - Patterns a neural network learns, these are not coded by us
+    Hyperparameters - It is like a dial that we can adjust to tweak the performance of the neural network
+'''
