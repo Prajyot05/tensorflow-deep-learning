@@ -117,3 +117,16 @@ def plot_predictions(train_data=X_train,
   plt.legend()
 
 plot_predictions()
+
+# Evaluating our model's predictions with regression evaluation metrics
+
+# Evaluating on the test
+model.evaluate(X_test, y_test)
+
+# Calculating the mean absolute error (great starter metric)
+mae = tf.keras.losses.MAE(y_true=y_test, y_pred=tf.squeeze(y_preds)) # Compressing y_preds to match the shape of y_test
+print(mae)
+
+# Calculating mean square error (useful when larger errors are more significant than smaller errors)
+mse = tf.keras.losses.MSE(y_true=y_test, y_pred=tf.squeeze(y_preds))
+print(mse)
