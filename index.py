@@ -1,6 +1,8 @@
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+from tensorflow.keras.utils import plot_model
 
 tf.random.set_seed(42)
 
@@ -89,7 +91,6 @@ Model: "sequential_2"
 model.fit(X_train, y_train, epochs=100, verbose=0)
 
 # Another way to visualize
-from tensorflow.keras.utils import plot_model
 
 plot_model(model=model, show_shapes=True)
 
@@ -124,9 +125,61 @@ plot_predictions()
 model.evaluate(X_test, y_test)
 
 # Calculating the mean absolute error (great starter metric)
-mae = tf.keras.losses.MAE(y_true=y_test, y_pred=tf.squeeze(y_preds)) # Compressing y_preds to match the shape of y_test
-print(mae)
+mae_1 = tf.keras.losses.MAE(y_true=y_test, y_pred=tf.squeeze(y_preds)) # Compressing y_preds to match the shape of y_test
+print(mae_1)
 
 # Calculating mean square error (useful when larger errors are more significant than smaller errors)
-mse = tf.keras.losses.MSE(y_true=y_test, y_pred=tf.squeeze(y_preds))
-print(mse)
+mse_1 = tf.keras.losses.MSE(y_true=y_test, y_pred=tf.squeeze(y_preds))
+print(mse_1)
+
+# Experimeting using variation in model training
+
+model_2 = tf.keras.Sequential([
+    tf.keras.layers.Dense(10),
+    tf.keras.layers.Dense(1)
+])
+
+model_2.compile(loss=tf.keras.losses.mae,
+                optimizer=tf.keras.optimizers.SGD(),
+                metrics=["mse"])
+
+model_2.fit(tf.expand_dims(X_train, axis=-1), y_train, epochs=100)
+
+y_preds_2 = model_2.predict(X_test)
+plot_predictions(predictions=y_preds_2)
+
+mae_2 = tf.keras.losses.MAE(y_true=y_test, y_pred=tf.squeeze(y_preds_2))
+print(mae_2)
+mse_2 = tf.keras.losses.MSE(y_true=y_test, y_pred=tf.squeeze(y_preds_2))
+print(mse_2)
+
+# Trying another model variation
+model_3 = tf.keras.Sequential([
+    tf.keras.layers.Dense(10),
+    tf.keras.layers.Dense(1)
+])
+
+model_3.compile(loss=tf.keras.losses.mae,
+                optimizer=tf.keras.optimizers.SGD(),
+                metrics=["mae"])
+
+model_3.fit(tf.expand_dims(X_train, axis=-1), y_train, epochs=100)
+
+y_preds_3 = model_3.predict(X_test)
+plot_predictions(predictions=y_preds_3) # This time the model did overfitting, it learned the training data too well and thats not good when testing new data
+
+mae_3 = tf.keras.losses.MAE(y_true=y_test, y_pred=tf.squeeze(y_preds_3)) # Compressing y_preds to match the shape of y_test
+print(mae_3)
+mse_3 = tf.keras.losses.MSE(y_true=y_test, y_pred=tf.squeeze(y_preds_3))
+print(mse_3)
+
+# Comparing the results of our model's variations
+
+model_results = [
+    ["model_1", mae_1.numpy(), mse_2.numpy()],
+    ["model_2", mae_2.numpy(), mse_2.numpy()],
+    ["model_3", mae_3.numpy(), mse_3.numpy()]
+]
+
+all_results = pd.DataFrame(model_results, columns=["model", "mae", "mse"])
+print(all_results) # So now we know what works and what doesn't
