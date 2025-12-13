@@ -219,17 +219,27 @@ tf.random.set_seed(42)
 
 # 1. Create
 insurance_model = tf.keras.Sequential([
+    tf.keras.layers.Dense(100),
     tf.keras.layers.Dense(10),
-    tf.keras.layers.Dense(1)
+    tf.keras.layers.Dense(1),
 ])
 
 # 2. Compile
 insurance_model.compile(loss=tf.keras.losses.mae,
-                        optimizer=tf.keras.optimizers.SGD(),
+                        optimizer=tf.keras.optimizers.Adam(),
                         metrics=["mae"])
 
 # 3. Fit
-insurance_model.fit(X_train, y_train, epochs=100)
+history = insurance_model.fit(X_train, y_train, epochs=200, verbose=0)
 
 # Evaluate the results of the insurance_model on the test data
-insurance_model.evaluate(X_test, y_test) # Very bad MAE right now
+insurance_model.evaluate(X_test, y_test)
+
+# Plot history (also known as loss curve or training curve), shows the progresss of loss reduction during training
+pd.DataFrame(history.history).plot()
+plt.ylabel("loss")
+plt.xlabel("epochs")
+
+# How long should you train for?
+# Tensoflow has a solution to this problem called EarlyStopping Callback
+# It is a component we can add to our model to stop training once the model stops improving a certain metric
