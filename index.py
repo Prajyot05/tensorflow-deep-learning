@@ -243,3 +243,48 @@ plt.xlabel("epochs")
 # How long should you train for?
 # Tensoflow has a solution to this problem called EarlyStopping Callback
 # It is a component we can add to our model to stop training once the model stops improving a certain metric
+
+# Normalization is a technique used to change the numeric columns in the dataset to a certain scale
+# Without distorting the differences in the range of values
+from sklearn.compose import make_column_transformer
+from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+
+# Create a column transformer
+ct = make_column_transformer(
+    (MinMaxScaler(), ["age", "bmi", "children"]), # Scale these columns
+    (OneHotEncoder(handle_unknown="ignore"), ["sex", "smoker", "region"]) # One-hot encode these
+)
+
+# Create features and labels
+X = insurance.drop("charges", axis=1)
+y = insurance["charges"]
+
+# Train test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Fit the column transformer to our training data
+ct.fit(X_train)
+
+# Transform training and test data with normalization (MinMaxScaler) and OneHotEncoder
+X_train_normal = ct.transform(X_train)
+X_test_normal = ct.transform(X_test)
+
+# Creating a model to train on our improved preprocessed data
+
+# 1. Create
+insurance_model_2 = tf.keras.Sequential([
+    tf.keras.layers.Dense(100),
+    tf.keras.layers.Dense(10),
+    tf.keras.layers.Dense(1)
+])
+
+# 2. Compile
+insurance_model_2.compile(loss=tf.keras.losses.mae,
+                          optimizer=tf.keras.optimizers.Adam(),
+                          metrics=["mae"])
+
+# 3. Fitting the model on the normalized data
+insurance_model_2.fit(X_train_normal, y_train, epochs=100, verbose=0)
+
+# Evaluating the latest model
+insurance_model_2.evaluate(X_test_normal, y_test)
