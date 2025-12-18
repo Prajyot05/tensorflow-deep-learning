@@ -39,3 +39,64 @@ model_1.fit(X, y, epochs=100, verbose=0)
 
 # Evaluating the model
 model_1.evaluate(X, y) # Terrible accuracy at this point
+
+# Improving the model
+# 1. Create
+model_2 = tf.keras.Sequential([
+    tf.keras.layers.Dense(100), # Add 100 dense neurons
+    tf.keras.layers.Dense(10), # Add another layer with 10 neurons
+    tf.keras.layers.Dense(1)
+])
+
+# 2. Compile
+model_2.compile(loss = tf.keras.losses.BinaryCrossentropy(),
+                optimizer = tf.keras.optimizers.Adam(),
+                metrics=["accuracy"])
+
+# 3. Fit
+model_2.fit(X, y, epochs=100, verbose=0)
+
+# 4. Evaluate
+model_2.evaluate(X, y)
+
+# Visualize the predictions against the actual data
+import numpy as np
+'''
+This function will:
+ 1. Take input features (X) and labels(y)
+ 2. Create a meshgrid of different X values
+ 3. Make predictions across the meshgrid
+ 4. Plot the predictions as well as a line between different zones (where each unique class falls)
+'''
+
+# Plots the decision boundary created by a model predicting on X                    
+def plot_decision_boundary(model, X, y):
+  # Define the axis boundaries of the plot and create a meshgrid.
+  x_min, x_max = X[:, 0].min() - 0.1, X[:, 0].max() + 0.1 # 0.1 is for margin
+  y_min, y_max = X[:, 1].min() - 0.1, X[:, 1].max() + 0.1
+
+  xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
+  
+  # Create X values that we are going to make predictions on
+  x_in = np.c_[xx.ravel(), yy.ravel()] # Stack 2D arrays together
+
+  # Make prediction
+  y_pred = model.predict(x_in)
+  
+  # Check for multi-class
+  if(len(y_pred[0])) > 1:
+    print("Doing multiclass classification")
+    # We have to reshape our predictions to get them ready for plotting
+    y_pred = np.argmax(y_pred, axis=1).reshape(xx.shape)
+  else:
+    print("Doing binary classification")
+    y_pred = np.round(y_pred).reshape(xx.shape)
+    
+  # Plot the decision boundary
+  plt.contourf(xx, yy, y_pred, cmap=plt.cm.RdYlBu, alpha=0.7)
+  plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap = plt.cm.RdYlBu)
+  plt.xlim(xx.min(), xx.max())
+  plt.ylim(yy.min(), yy.max())
+
+# Plotting the model
+plot_decision_boundary(model_2, X, y)
