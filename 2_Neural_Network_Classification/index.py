@@ -100,3 +100,35 @@ def plot_decision_boundary(model, X, y):
 
 # Plotting the model
 plot_decision_boundary(model_2, X, y)
+
+'''
+Activation Function: 
+  A mathematical function applied to the output of a neuron.
+  It decides whether a neuron should be activated based on the weighted sum of inputs and a bias term.
+  It introduces non-linearity, enabling the model to learn and represent complex data patterns.
+  Without it, even a deep neural network would behave like a simple linear regression model.
+
+Non-linear functions allow neural networks to form curved decision boundaries, making them capable of handling complex patterns.
+'''
+
+# Creating a model with non-linear activation functions
+# 1. Create
+model_3 = tf.keras.Sequential([
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"), 
+    tf.keras.layers.Dense(1, activation="sigmoid") # Three layers with 4, 4, 1 neuron for respective layer
+])
+
+# 2. Compile
+model_3.compile(loss = tf.keras.losses.BinaryCrossentropy(),
+                optimizer = tf.keras.optimizers.Adam(),
+                metrics=["accuracy"])
+
+# 3. Fit
+history = model_3.fit(X, y, epochs=100, verbose=0)
+
+# 4. Evaluate
+model_3.evaluate(X, y)
+
+# Plot
+plot_decision_boundary(model_3, X, y)
