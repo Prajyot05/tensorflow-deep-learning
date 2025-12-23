@@ -132,3 +132,15 @@ model_3.evaluate(X, y)
 
 # Plot
 plot_decision_boundary(model_3, X, y)
+
+# Create a temporary tensor to test how different activation functions change it
+A = tf.cast(tf.range(-10, 10), dtype=tf.float32)
+
+# Linear - Does not change the input at all
+tf.keras.activations.linear(A)
+
+# Sigmoid - y = 1 / (1 + tf.exp(-x))
+tf.keras.activations.sigmoid(A)
+
+# ReLu - y = tf.maximum(0, x)
+tf.keras.activations.relu(A)
