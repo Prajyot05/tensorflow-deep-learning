@@ -144,3 +144,42 @@ tf.keras.activations.sigmoid(A)
 
 # ReLu - y = tf.maximum(0, x)
 tf.keras.activations.relu(A)
+
+# Seperating training and test datasets
+X_train, y_train = X[:800], y[:800]
+X_test, y_test = X[800:], y[800:]
+
+# 1. Create
+model_4 = tf.keras.Sequential([
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(1, activation="sigmoid")
+])
+
+# 2. Compile
+model_4.compile(loss = tf.keras.losses.BinaryCrossentropy(), # loss function tells how wrong the patterns being formed are
+                optimizer = tf.keras.optimizers.Adam(learning_rate=0.01), # optimizer tells how the model should be improved, learning rate tells how much the model should be improved
+                metrics = ["accuracy"]) # Lower learning rate means lesser changes to the patterns for improvement
+'''
+Example: if learning rate is 0.001 then for each epoch, the weights will be improved by a scale of 0.001
+So by making learning rate 0.01, we have increased the potential of the model to improve its weight 10 times as much.
+That's not exactly how it works, but it's a good way to think about it for developing intuition
+'''
+
+# 3. Fit
+history = model_3.fit(X_train, y_train, epochs = 25, verbose = 0) # The losses change much faster compared to lower learning rate models
+
+# 4. Evaluate
+model_4.evaluate(X_test, y_test)
+
+# Plot the decision boundary for the training and test sets
+plt.figure(figsize=(12, 6))
+plt.subplot(1, 2, 1)
+plt.title("Train")
+plot_decision_boundary(model_4, X_train, y_train)
+
+plt.subplot(1, 2, 2)
+plt.title("Test")
+plot_decision_boundary(model_4, X_test, y_test)
+
+plt.show()
