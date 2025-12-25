@@ -183,3 +183,51 @@ plt.title("Test")
 plot_decision_boundary(model_4, X_test, y_test)
 
 plt.show()
+
+# Plot the loss (or training) curves
+
+# history.history is a record of training loss values and metrics values at successive epochs, as well as validation loss values and validation metrics values (if applicable).
+pd.DataFrame(history.history).plot()
+plt.title("model_4 loss curves")
+plt.show()
+
+'''
+Finding the best learning rate
+The best learning rate would be the one where the loss decreases the most during training
+Use these to find the best learning rate:
+  1. A learning rate callback (callback is like an extra piece of functionality that you can add to the model WHILE it is training)
+  2. Another model
+  3. A modified loss curves plot
+'''
+
+# 1. Create
+model_5 = tf.keras.Sequential([
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(1, activation="sigmoid")
+])
+
+# 2. Compile
+model_5.compile(loss = tf.keras.losses.BinaryCrossentropy(),
+                optimizer = tf.keras.optimizers.Adam(),
+                metrics = ["accuracy"])
+
+# 3. Create a learning rate callback
+lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-4 * 10**(epoch/20))
+# What the above line means is that for every epoch to traverse a set of learning rate values starting from 1e-4 and increasing by 10**(epoch/20) every epoch
+
+# r. Fitting the model
+history_5 = model_5.fit(X_train, y_train, epochs=100, callbacks=[lr_scheduler])
+
+pd.DataFrame(history_5.history).plot(figsize=(10, 7), xlabel="epochs")
+plt.show()
+# The ideal learning rate is somewhere where the loss is 10 times smaller than where it is the lowest
+
+# Plot the learning rate vs the loss
+lrs = 1e-4 * (10 ** (tf.range(100) / 20)) # Because we did 100 epochs
+plt.figure(figsize=(10, 7))
+plt.semilogx(lrs, history_5.history["loss"])
+plt.xlabel("Learning Rate")
+plt.ylabel("Loss")
+plt.title("Learning Rate vs Loss")
+plt.show()
