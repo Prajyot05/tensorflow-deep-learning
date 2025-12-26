@@ -231,3 +231,80 @@ plt.xlabel("Learning Rate")
 plt.ylabel("Loss")
 plt.title("Learning Rate vs Loss")
 plt.show()
+
+'''
+Different classification evaluation methods:
+  1. Accuracy
+  2. Precision
+  3. Recall
+  4. F1-Score - Based on precision and recall, usually a very good metric
+  5. Confusion Matrix
+  6. Classification Report (from scikit-learn)
+'''
+
+# Check the accuracy of our model
+loss, accuracy = model_5.evaluate(X_test, y_test)
+print(f"Model loss on the test set: {loss}")
+print(f"Model accuracy on the test set: {(accuracy*100):.2f}%")
+
+# Creating a Confusion Matrix
+from sklearn.metrics import confusion_matrix
+
+# Make predictions
+y_preds = model_5.predict(X_test) # This is currently in prediction probability form, we need to convert it to binary (0 or 1)
+y_preds = tf.round(y_preds) # Rounds it to 0 or 1
+
+print(confusion_matrix(y_test, y_preds))
+
+# Making the confusion matrix prettier
+import itertools
+figsize = (10, 10)
+
+# Create the confusion matrix
+cm = confusion_matrix(y_test, y_preds)
+cm_norm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis] # Normalize our confusion matrix
+print(cm_norm)
+
+n_classes = cm.shape[0] # Right now we have 2 classes but in the future we would have more
+
+# To prettify it
+fig, ax = plt.subplots(figsize=figsize)
+# Create matrix plot
+cax = ax.matshow(cm, cmap=plt.cm.Blues)
+fig.colorbar(cax)
+
+# Create classes
+classes = False # For if we have a list of classes
+
+if classes:
+  lables = classes
+else:
+  labels = np.arange(cm.shape[0])
+
+# Label the axes
+ax.set(title="Confusion Matrix",
+       xlabel="Predicted Label",
+       ylabel="True Label",
+       xticks=np.arange(n_classes),
+       yticks=np.arange(n_classes),
+       xticklabels=labels,
+       yticklabels=labels)
+
+# Set x-axis labels to bottom
+ax.xaxis.set_label_position("bottom")
+ax.xaxis.tick_bottom()
+
+# Adjust label size
+ax.xaxis.label.set_size(20)
+ax.yaxis.label.set_size(20)
+ax.title.set_size(20)
+
+# Set the threshold for different colors
+threshold = (cm.max() + cm.min()) / 2.0 # This will give our confusion matrix different shades of squares depending on how many values are in there
+
+# Plot the text on each cell
+for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+  plt.text(j, i, f"{cm[i, j]} ({cm_norm[i, j] * 100:.1f}%)",
+           horizontalalignment="center",
+           color="white" if cm[i, j] > threshold else "black",
+           size=15)
