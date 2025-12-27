@@ -308,3 +308,22 @@ for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
            horizontalalignment="center",
            color="white" if cm[i, j] > threshold else "black",
            size=15)
+  
+'''
+Multi-class Classification: When you have more than 2 classes
+We will be using the tensorflow fashion dataset that has 9 classes
+'''
+from tensorflow.keras.datasets import fashion_mnist
+
+# The data has already been sorted into training and test dataset
+(train_data, train_labels), (test_data, test_labels) = fashion_mnist.load_data()
+
+# Check the shape of a single example
+print(train_data[0].shape)
+print(train_labels[0].shape)
+
+# Plot a single sample
+plt.imshow(train_data[0])
+
+# Checkout the sample's label
+print(train_labels[0])
