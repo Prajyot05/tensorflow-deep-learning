@@ -327,3 +327,23 @@ plt.imshow(train_data[0])
 
 # Checkout the sample's label
 print(train_labels[0])
+
+# Create a list so we can index onto our training labels so they're human-readable
+class_names = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+               'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+# Plot an example image and it's label
+index_of_choice = 17
+plt.imshow(train_data[index_of_choice], cmap=plt.cm.binary)
+plt.title(class_names[train_labels[index_of_choice]])
+
+# Plot multiple random images of fashion MNIST
+import random
+plt.figure(figsize=(7, 7))
+
+for i in range(4):
+  ax = plt.subplot(2, 2, i + 1)
+  rand_index = random.choice(range(len(train_data)))
+  plt.imshow(train_data[rand_index], cmap=plt.cm.binary)
+  plt.title(class_names[train_labels[rand_index]])
+  plt.axis("off")
