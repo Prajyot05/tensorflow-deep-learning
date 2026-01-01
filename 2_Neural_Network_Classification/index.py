@@ -347,3 +347,30 @@ for i in range(4):
   plt.imshow(train_data[rand_index], cmap=plt.cm.binary)
   plt.title(class_names[train_labels[rand_index]])
   plt.axis("off")
+
+# Building a multi-class classification model
+'''
+Input shape = 28 * 28 (the shape of one image)
+Output shape = 10 (one class per clothing)
+Loss Function = tf.keras.losses.CategoricalCrossEntropy() # If the data is one-hot encoded
+              = tf.keras.losses.SparseCategoricalCrossentropy() # If the data is in integers
+Output layer activation = Softmax
+'''
+
+tf.random.set_seed(42)
+
+# 1. Create
+model_6 = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)), # Flattens 
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(10, activation="softmax")
+])
+
+# 2. Compile
+model_6.compile(loss = tf.keras.losses.SparseCategoricalCrossentropy(), # Since our data is not one-hot encoded
+                optimizer = tf.keras.optimizers.Adam(),
+                metrics =["accuracy"])
+
+# 3. Fit
+non_norm_history = model_6.fit(train_data, train_labels, epochs=10, validation_data=(test_data, test_labels))
