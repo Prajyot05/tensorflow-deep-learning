@@ -374,3 +374,50 @@ model_6.compile(loss = tf.keras.losses.SparseCategoricalCrossentropy(), # Since 
 
 # 3. Fit
 non_norm_history = model_6.fit(train_data, train_labels, epochs=10, validation_data=(test_data, test_labels))
+
+'''
+Neural networks prefer data to be scaled (or normalised), 
+this means they like to have numbers in the tensors to be between 0 and 1.
+'''
+print(train_data.min(), train_data.max()) # Right now our data is between 0 and 255
+
+# We can get our data between 0 and 1 by dividing all values by the maximum value
+train_data_norm = train_data / 255.0
+test_data_norm = test_data / 255.0
+
+# Check the range of the scaled training data
+print(train_data_norm.min(), train_data_norm.max())
+
+# Creating a model using the scaled/normalized data
+
+# 1. Create
+model_7 = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)), # Flattens
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(10, activation="softmax")
+])
+
+# 2. Compile
+model_7.compile(loss = tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer = tf.keras.optimizers.Adam(),
+                metrics =["accuracy"])
+
+# 3. Fit
+norm_history = model_7.fit(train_data_norm, train_labels, epochs=10, validation_data=(test_data_norm, test_labels))
+
+# Just by normalizing the data, the performance of the model has increased a lot
+
+'''
+Comparing normalized and unnormalized data
+The same model with even slightly different data can produce dramatically different results.
+So when you're comparing models, it's important to make sure you're comparing them on the same criteria.
+Ex: Same architecture but different data, or same data but different architecture
+'''
+import pandas as pd
+
+# Plot non-normalized data loss curves
+pd.DataFrame(non_norm_history.history).plot(title="Non-normalized data")
+
+# Plot normalized data loss curves
+pd.DataFrame(norm_history.history).plot(title="Normalized data")
