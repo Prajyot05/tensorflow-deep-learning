@@ -277,7 +277,7 @@ fig.colorbar(cax)
 classes = False # For if we have a list of classes
 
 if classes:
-  lables = classes
+  labels = classes
 else:
   labels = np.arange(cm.shape[0])
 
@@ -421,3 +421,109 @@ pd.DataFrame(non_norm_history.history).plot(title="Non-normalized data")
 
 # Plot normalized data loss curves
 pd.DataFrame(norm_history.history).plot(title="Normalized data")
+
+# Finding the ideal learning rate
+
+# 1. Create
+model_8 = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)), # Flattens
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(10, activation="softmax")
+])
+
+# 2. Compile
+model_8.compile(loss = tf.keras.losses.SparseCategoricalCrossentropy(),
+                optimizer = tf.keras.optimizers.Adam(),
+                metrics =["accuracy"])
+
+# Create the learning rate callback
+lr_scheduler = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-3 * 10**(epoch/20))
+
+# 3. Fit
+find_lr_history = model_8.fit(train_data_norm,
+                           train_labels,
+                           epochs=40,
+                           validation_data=(test_data_norm, test_labels),
+                           callbacks=[lr_scheduler])
+
+# Plot the learning rate decay curve
+import numpy as np
+import matplotlib.pyplot as plt
+
+lrs = 1e-3 * 10**(tf.range(40)/20)
+plt.semilogx(lrs, find_lr_history.history["loss"])
+plt.xlabel("Learning Rate")
+plt.ylabel("Loss")
+plt.title("Finding the ideal learning rate")
+# We can see in the graph that the Adam default learning rate is pretty much the ideal rate for this model as well
+
+from sklearn.metrics import confusion_matrix
+import itertools
+'''
+Evaluating the multi-class classification model
+To evaluate the model, we could:
+  1. Evaluate the performance using other classification metrics (such as confusion matrix)
+  2. Assess some of it's predictions (through visualizations)
+  3. Improve it's results (by training it for longer or changing the architecture)
+  4. Save and export it for use in an application
+'''
+
+# Creating a Confusion Matrix
+def make_confusion_matrix(y_true, y_pred, classes=None, figsize=(10, 10), text_size=15):
+  cm = confusion_matrix(y_true, y_pred)
+  cm_norm = cm.astype(float) / cm.sum(axis=1, keepdims=True)
+  cm_norm = np.nan_to_num(cm_norm)
+
+  n_classes = cm.shape[0] # Right now we have 2 classes but in the future we would have more
+
+  # To prettify it
+  fig, ax = plt.subplots(figsize=figsize)
+  # Create matrix plot
+  cax = ax.matshow(cm, cmap=plt.cm.Blues)
+  fig.colorbar(cax)
+
+  # Set labels to be classes
+  if classes:
+    labels = classes
+  else:
+    labels = np.arange(cm.shape[0])
+
+  # Label the axes
+  ax.set(title="Confusion Matrix",
+        xlabel="Predicted Label",
+        ylabel="True Label",
+        xticks=np.arange(n_classes),
+        yticks=np.arange(n_classes),
+        xticklabels=labels,
+        yticklabels=labels)
+
+  # Set x-axis labels to bottom
+  ax.xaxis.set_label_position("bottom")
+  ax.xaxis.tick_bottom()
+
+  # Adjust label size
+  ax.xaxis.label.set_size(text_size)
+  ax.yaxis.label.set_size(text_size)
+  ax.title.set_size(text_size)
+
+  # Set the threshold for different colors
+  threshold = (cm.max() + cm.min()) / 2.0 # This will give our confusion matrix different shades of squares depending on how many values are in there
+
+  # Plot the text on each cell
+  for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+    plt.text(j, i, f"{cm[i, j]} ({cm_norm[i, j] * 100:.1f}%)",
+            horizontalalignment="center",
+            color="white" if cm[i, j] > threshold else "black",
+            size=text_size)
+
+  plt.show()
+
+# Predictions should be made on the same kind of data that the model was trained on
+y_probs = model_8.predict(test_data_norm) # probs is short for probabilities
+
+# Convert all the prediction probabilities into integers
+y_preds = y_probs.argmax(axis=1)
+
+# Plot the confusion matrix
+make_confusion_matrix(test_labels, y_preds, class_names, figsize=(15, 15), text_size=10)
