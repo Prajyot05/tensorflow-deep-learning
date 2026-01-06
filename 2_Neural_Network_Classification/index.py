@@ -527,3 +527,42 @@ y_preds = y_probs.argmax(axis=1)
 
 # Plot the confusion matrix
 make_confusion_matrix(test_labels, y_preds, class_names, figsize=(15, 15), text_size=10)
+
+'''
+Creating a function to:
+  1. Plot a random image
+  2. Make a prediction on the image
+  3. Label the plot with truth table and the predicted label
+'''
+
+import random
+
+def plot_random_image(model, images, true_labels, classes):
+  # Picks a random image, plots it and labels it with a prediction and truth label
+
+  # Setup a random integer
+  index = random.randint(0, len(images))
+
+  # Create predictions and targets
+  target_image = images[index]
+  pred_probs = model.predict(target_image.reshape(1, 28, 28))
+  pred_label = classes[pred_probs.argmax()]
+  true_label = classes[true_labels[index]]
+
+  # Plot the image
+  plt.imshow(target_image, cmap=plt.cm.binary)
+
+  # Change the color of the titles depending on if the prediction is right or wrong
+  if pred_label == true_label:
+    color = "green"
+  else:
+    color = "red"
+
+  # Add xlabel information (prediction/true label)
+  plt.xlabel("Pred: {} {:2.0f}% (True: {})".format(pred_label,
+                                                   100 * tf.reduce_max(pred_probs), \
+                                                   true_label),
+             color) # Set the color based on if the prediction is right or wrong
+  
+  # Checkout a random image as well as it's prediction
+plot_random_image(model_8, test_data, test_labels, class_names)
