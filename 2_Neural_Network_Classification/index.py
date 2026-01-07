@@ -566,3 +566,35 @@ def plot_random_image(model, images, true_labels, classes):
   
   # Checkout a random image as well as it's prediction
 plot_random_image(model_8, test_data, test_labels, class_names)
+
+'''
+Neural networks learn patterns in our data so that we can use those patterns later on.
+But how do those patterns look like?
+'''
+
+# Find the layers of our most recent model
+# Each layer has a specific role in finding patterns in the numbers that we feed it
+model_8.layers
+
+# Get the patterns of a layer in our network
+weights, biases = model_8.layers[1].get_weights()
+
+# Shapes
+print(weights, weights.shape)
+
+# Bias Vector
+print(biases, biases.shape)
+
+'''
+Weight matrix has one value per data point, while the bias vector has one value per hidden unit.
+Every neuron has a bias vector. Each of these is paired with a weights matrix.
+
+The bias vector dictates how much the patterns within the corresponding weights matrix should influence the next layer.
+It gets initialized as zeroes (atleast in the case of a tensorflow dense layer).
+'''
+
+# Another way of viewing our deep learning models
+from tensorflow.keras.utils import plot_model
+
+# See the inputs and outputs of each layer
+plot_model(model_8, show_shapes=True)
