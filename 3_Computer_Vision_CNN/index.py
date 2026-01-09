@@ -16,3 +16,26 @@ Architecture of a CNN:
 
 A CNN is typically a stack of convolutional layers, pooling layers, and non-linear activations all jumbled together.
 '''
+
+'''
+Computer vision is the practice of writing algorithms which can discover patterns in visual data.
+'''
+
+# Get the data (wget downloads the data into the current colab directory)
+import zipfile
+# wget https://storage.googleapis.com/ztm_tf_course/food_vision/pizza_steak.zip
+
+# Unzip the downloaded file
+zip_ref = zipfile.ZipFile("pizza_steak.zip")
+zip_ref.extractall()
+zip_ref.close()
+
+# Inspect the data
+'''
+A very crucial step at the beginning of any machine learning project is to become one with the data.
+For a computer vision project it usually means visualizing many samples of the data.
+'''
+import os
+# Walk through the pizza_steak directory and list number of files
+for dirpath, dirnames, filenames in os.walk("pizza_steak"):
+  print(f"There are {len(dirnames)} directories and {len(filenames)} images in '{dirpath}'.")
