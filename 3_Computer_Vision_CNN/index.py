@@ -78,3 +78,66 @@ print(img)
 
 # View the image shape
 print(img.shape) # Returns the width, height and color channels
+
+'''
+Now we need a way to:
+  1. Load our images
+  2. Preprocess our images
+  3. Build a CNN to find patterns in our images
+  4. Compile our CNN
+  5. Fit the CNN to our training data
+'''
+import tensorflow as tf
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+# Set the seed
+tf.random.set_seed(42)
+
+# Preprocess the data (Get all of the pixel values between 0 and 1, also called as scaling or normalization)
+train_datagen = ImageDataGenerator(rescale=1./255) # Generates batches of tensor image data with real-time data augmentation
+valid_datagen = ImageDataGenerator(rescale=1./255)
+
+# Setup paths to our data directories
+train_dir = "pizza_steak/train"
+test_dir = "pizza_steak/test"
+
+# Import data from directories and turn it into batches
+train_data = train_datagen.flow_from_directory(directory=train_dir,
+                                               batch_size=32, # Yann LeCun famously advised, "Friends don't let friends use batch sizes greater than 32" 
+                                               target_size=(224, 224), # We want all our images to be of this shape
+                                               class_mode="binary", # Since we are importing our data in binary format
+                                               seed=42) # For reproducibility
+
+valid_data = valid_datagen.flow_from_directory(directory=test_dir,
+                                               batch_size=32,
+                                               target_size=(224, 224),
+                                               class_mode="binary",
+                                               seed=42)
+
+# Build a CNN model (same as Tiny VGG on the CNN explainer website)
+model_1 = tf.keras.Sequential([
+  tf.keras.layers.Conv2D(filters=10,
+                         kernel_size=3,
+                         activation="relu",
+                         input_shape=(224, 224, 3)),
+  tf.keras.layers.Conv2D(10, 3, activation="relu"), # This layer is the exact same as the above one
+  tf.keras.layers.MaxPool2D(pool_size=2,
+                            padding="valid"),
+  tf.keras.layers.Conv2D(10, 3, activation="relu"),
+  tf.keras.layers.Conv2D(10, 3, activation="relu"),
+  tf.keras.layers.MaxPool2D(2),
+  tf.keras.layers.Flatten(),
+  tf.keras.layers.Dense(1, activation="sigmoid")
+])
+
+# Compile our CNN
+model_1.compile(loss="binary_crossentropy",
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=["accuracy"]) # Generally a good metric for classification problems
+
+# Fit the model
+history_1 = model_1.fit(train_data,
+                        epochs=5,
+                        steps_per_epoch=len(train_data), # If have 1500 images and batch size is 32, then per epoch images looked at will be 1500/32 = 47
+                        validation_data=valid_data,
+                        validation_steps=len(valid_data))
