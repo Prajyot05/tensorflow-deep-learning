@@ -125,6 +125,7 @@ model_1 = tf.keras.Sequential([
                             padding="valid"),
   tf.keras.layers.Conv2D(10, 3, activation="relu"),
   tf.keras.layers.Conv2D(10, 3, activation="relu"),
+  # tf.keras.layers.Activations(tf.nn.relu), We can use this instead of writing 'activation="relu"' as well
   tf.keras.layers.MaxPool2D(2),
   tf.keras.layers.Flatten(),
   tf.keras.layers.Dense(1, activation="sigmoid")
@@ -141,3 +142,63 @@ history_1 = model_1.fit(train_data,
                         steps_per_epoch=len(train_data), # If have 1500 images and batch size is 32, then per epoch images looked at will be 1500/32 = 47
                         validation_data=valid_data,
                         validation_steps=len(valid_data))
+
+# It was taking over 100 seconds per epoch before switching the runtime type to T4 GPU, now it's taking 10 seconds on average
+# The first epoch usually takes longer (by about 50%) than other epochs just because it needs to load the data into memory to run and find patterns on.
+
+# Get the model summary
+model_1.summary()
+
+'''
+Trying to see if the tensorflow playground model works on our image data.
+'''
+
+# 1. Create
+model_2 = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(224, 224, 3)),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(4, activation="relu"),
+    tf.keras.layers.Dense(1, activation="sigmoid")
+])
+
+# 2. Compile
+model_2.compile(loss="binary_crossentropy",
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=["accuracy"])
+
+# 3. Fit
+history_2 = model_2.fit(train_data,
+                        epochs=5,
+                        steps_per_epoch=len(train_data),
+                        validation_data=valid_data,
+                        validation_steps=len(valid_data))
+
+# The performance of this model is terrible, it's getting a 50% accuracy at each epoch
+
+model_2.summary()
+# This model has 20 times more parameters than our CNN model, still it's performance is not good
+
+# Improving the dense model
+
+# 1. Create
+model_3 = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(224, 224, 3)),
+    tf.keras.layers.Dense(100, activation="relu"),
+    tf.keras.layers.Dense(100, activation="relu"),
+    tf.keras.layers.Dense(100, activation="relu"),
+    tf.keras.layers.Dense(1, activation="sigmoid")
+])
+
+# 2. Compile
+model_3.compile(loss="binary_crossentropy",
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=["accuracy"])
+
+# 3. Fit
+history_3 = model_3.fit(train_data,
+                        epochs=5,
+                        steps_per_epoch=len(train_data),
+                        validation_data=valid_data,
+                        validation_steps=len(valid_data))
+
+# This model got a better accuracy than before (75% by the end), but took 500 times more parameters than the CNN.
