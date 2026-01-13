@@ -202,3 +202,31 @@ history_3 = model_3.fit(train_data,
                         validation_steps=len(valid_data))
 
 # This model got a better accuracy than before (75% by the end), but took 500 times more parameters than the CNN.
+
+'''
+Trainable parameters are patterns a model can learn from the data.
+Intuitively it might seem as though the higher the number, the better it would be, and usually that is the case.
+But in this case, the difference is in the two different styles of model we're using.
+Where a series of dense layers has a number of different learnable parameters connected to each other
+and hence a higher number of possible learnable patterns,
+a CNN seeks to sort out and learn the most important patterns in an image.
+So even if a CNN has lesser trainable parameters, they are often more helpful in deciphering between different features in an image.
+'''
+
+'''
+Binary Classification Steps:
+  1. Become one with the data (visualization)
+  2. Preprocess the data (prepare it for the model, mainly through scaling/normalization)
+  3. Create the model (start with a baseline)
+  4. Fit the model
+  5. Evaluate the model
+  6. Adjust different parameters and improve the model (try to beat our baseline)
+  7. Repeat until satisfied (experimentation)
+'''
+
+# 1. Visualize the data
+plt.figure()
+plt.subplot(1, 2, 1)
+steak_img = view_random_image("pizza_steak/train/", "steak")
+plt.subplot(1, 2, 2)
+pizza_img = view_random_image("pizza_steak/train/", "pizza")
