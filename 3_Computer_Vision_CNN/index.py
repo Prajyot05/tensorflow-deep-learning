@@ -216,7 +216,7 @@ So even if a CNN has lesser trainable parameters, they are often more helpful in
 '''
 Binary Classification Steps:
   1. Become one with the data (visualization)
-  2. Preprocess the data (prepare it for the model, mainly through scaling/normalization)
+  2. Preprocess the data (prepare it for the model, mainly through scaling/normalization, and turning our data into batches)
   3. Create the model (start with a baseline)
   4. Fit the model
   5. Evaluate the model
@@ -230,3 +230,45 @@ plt.subplot(1, 2, 1)
 steak_img = view_random_image("pizza_steak/train/", "steak")
 plt.subplot(1, 2, 2)
 pizza_img = view_random_image("pizza_steak/train/", "pizza")
+
+# 2. Preprocess the data
+
+# Define directory dataset paths
+train_dir = "pizza_steak/train/"
+test_dir = "pizza_steak/test/"
+
+'''
+Now we turn the data into batches (usually 32)
+The reasons:
+  1. All images might not fit into the memory at once.
+  2. The model looking at them all in one go might not result in it finding the most accurate patterns
+'''
+
+# Create train and test data generators and rescale the data
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+train_datagen = ImageDataGenerator(rescale=1/255.) # Rescale is basically saying, when the images are loaded,divide all pixel values by 255
+test_datagen = ImageDataGenerator(rescale=1/255.)
+
+# Load in the image data from our directories and turn them into batches
+train_data = train_datagen.flow_from_directory(directory=train_dir,
+                                               target_size=(224, 224),
+                                               class_mode="binary",
+                                               batch_size=32)
+
+test_data = test_datagen.flow_from_directory(directory=test_dir,
+                                             target_size=(224, 224),
+                                             class_mode="binary",
+                                             batch_size=32)
+
+# Get a sample of the train data batch
+images, labels = next(train_data) # Get the 'next' batch of image/labels from the train dataset
+print(len(images), len(labels))
+
+# How many batches are there? (1500 / 32)
+len(train_data)
+
+# Get the first two images
+print(images[:2], images[0].shape)
+
+# View the first batch of labels
+print(labels)
