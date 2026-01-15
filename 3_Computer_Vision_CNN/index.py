@@ -272,3 +272,33 @@ print(images[:2], images[0].shape)
 
 # View the first batch of labels
 print(labels)
+
+'''
+3. Create a CNN Model (start with a baseline)
+A baseline is a relatively simple model or existing result that you setup when beginning a machine learning experiment.
+And then as you keep experimenting, you try to beat the baseline.
+
+Note: In deep learning, there is almost an infinite number of architectures you can create.
+So one of the best ways to get started is to start with something simple and see if it works
+and then introduce complexity as required. 
+E.g. look at which current model is performing the best in the field for your problem
+'''
+
+# Make the creating of our model a bit easier
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D, Activation
+from tensorflow.keras import Sequential
+
+# Create the model (this will be our baseline, a three layer convolutional neural network)
+model_4 = Sequential([
+    Conv2D(filters=10,
+           kernel_size=3,
+           strides=1,
+           padding="valid", # strides and padding have these values by default it's not necessary to set them
+           activation="relu",
+           input_shape=(224, 224, 3)), # Input layer
+    Conv2D(10, 3, activation="relu"),
+    Conv2D(10, 3, activation="relu"),
+    Flatten(),
+    Dense(1, activation="sigmoid") # Output layer (working with binary classification so only 1 ouput neuron)
+])
