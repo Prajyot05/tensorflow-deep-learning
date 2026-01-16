@@ -280,7 +280,7 @@ And then as you keep experimenting, you try to beat the baseline.
 
 Note: In deep learning, there is almost an infinite number of architectures you can create.
 So one of the best ways to get started is to start with something simple and see if it works
-and then introduce complexity as required. 
+and then introduce complexity as required.
 E.g. look at which current model is performing the best in the field for your problem
 '''
 
@@ -292,8 +292,8 @@ from tensorflow.keras import Sequential
 # Create the model (this will be our baseline, a three layer convolutional neural network)
 model_4 = Sequential([
     Conv2D(filters=10,
-           kernel_size=3,
-           strides=1,
+           kernel_size=3, # same as saying kernel_size=(3, 3)
+           strides=1, # same as saying strides=(1, 1)
            padding="valid", # strides and padding have these values by default it's not necessary to set them
            activation="relu",
            input_shape=(224, 224, 3)), # Input layer
@@ -302,3 +302,32 @@ model_4 = Sequential([
     Flatten(),
     Dense(1, activation="sigmoid") # Output layer (working with binary classification so only 1 ouput neuron)
 ])
+
+# Compile the model
+model_4.compile(loss="binary_crossentropy")
+
+'''
+Breakdown of the Conv2D layer:
+
+  1. The "2D" means our inputs are two dimensional (height and width), even though they have 3 colour channels.
+     The convolutions are run on each channel invididually.
+
+  2. filters - These are the number of "feature extractors" that will be moving over our images.
+               It decides how many filters should pass over an input tensor (sliding windows over an image).
+               Higher values lead to more complex models.
+               We don't define what these filters learn as they pass over an image, the neural network figures that out itself.
+
+  3. kernel_size - It is the size/shape of our filters (sliding windows).
+                   For example, a kernel_size of (3, 3) (or just 3) will mean each filter will have the size 3x3,
+                   meaning it will look at a space of 3x3 pixels each time.
+                   The smaller the kernel, the more fine-grained features it will extract.
+                   So lower values learn smaller features, higher values learn larger features.
+
+  4. padding - This pads the target tensor with zeroes (if 'same') to preserve the input shape.
+               Or it leaves the target tensor as-it-is / unpadded (if 'valid'), lowering the output shape.
+               If you want to keep more information in your input tensor, keep it 'same',
+               If you want to compress the information passing through each layer, keep it 'valid'.
+
+  5. stride - It is the number of steps a filter takes across an image at a time.
+              E.g. A stride of 1 means the filter moves across each pixel 1 by 1. A stride of 2 means it moves 2 pixels at a time.
+'''
