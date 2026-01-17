@@ -331,3 +331,15 @@ Breakdown of the Conv2D layer:
   5. stride - It is the number of steps a filter takes across an image at a time.
               E.g. A stride of 1 means the filter moves across each pixel 1 by 1. A stride of 2 means it moves 2 pixels at a time.
 '''
+
+print(model_4.summary())
+
+# Check the lenghts of the training and test generators
+print(len(train_data), len(test_data))
+
+# Fit the model
+history_4 = model_4.fit(train_data, # This is a combination of labels and sample data
+                        epochs=5,
+                        steps_per_epoch=len(train_data), # So that it goes through all 47 batches
+                        validation_data=test_data,
+                        validation_steps=len(test_data))
