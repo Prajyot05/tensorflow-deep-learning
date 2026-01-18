@@ -343,3 +343,41 @@ history_4 = model_4.fit(train_data, # This is a combination of labels and sample
                         steps_per_epoch=len(train_data), # So that it goes through all 47 batches
                         validation_data=test_data,
                         validation_steps=len(test_data))
+
+# Evaluating our model
+
+import pandas as pd
+pd.DataFrame(history_4.history).plot(figsize=(10, 7))
+
+# Plot the validation and training curves seperately
+def plot_loss_curves(history):
+  loss = history.history["loss"]
+  val_loss = history.history["val_loss"]
+
+  accuracy = history.history["accuracy"]
+  val_accuracy = history.history["val_accuracy"]
+
+  epochs = range(len(history.history["loss"]))
+
+  # Plot Loss
+  plt.plot(epochs, loss, label="training_loss")
+  plt.plot(epochs, val_loss, label="val_loss")
+  plt.title("loss")
+  plt.xlabel("epochs")
+  plt.legend()
+
+  # Plot accuracy
+  plt.figure()
+  plt.plot(epochs, accuracy, label="training_accuracy")
+  plt.plot(epochs, val_accuracy, label="val_accuracy")
+  plt.title("accuracy")
+  plt.xlabel("epochs")
+  plt.legend()
+  
+plot_loss_curves(history_4)
+
+'''
+When a model's validation loss starts to increase, it's likely that the model is overfitting the training dataset.
+This means, it's learning the patterns in the training dataset too well and thus the model's ability to generalize
+to unseen data will be diminished.
+'''
