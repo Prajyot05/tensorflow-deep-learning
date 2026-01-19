@@ -381,3 +381,52 @@ When a model's validation loss starts to increase, it's likely that the model is
 This means, it's learning the patterns in the training dataset too well and thus the model's ability to generalize
 to unseen data will be diminished.
 '''
+
+# Adjusting the model parameters
+'''
+Fitting a machine learning model comes in 3 steps:
+  1. Create a baseline
+  2. Beat the baseline by overfitting a larger model
+  3. Reduce overfitting (also known as reguralization)
+
+Ways to induce overfitting:
+  1. Increase the number of conv layers
+  2. Increase the number of conv filters
+  3. Add another dense layer to the output of our flattened layer
+
+Ways to reduce overfitting:
+  1. Add data augmentation
+  2. Add regularization layers (such as MaxPool2D)
+  3. Add more data
+'''
+
+# Create the model (this is going to be our new baseline)
+model_5 = Sequential([
+    Conv2D(10, 3, activation="relu", input_shape=(224, 224, 3)),
+    MaxPool2D(pool_size=2),
+    Conv2D(10, 3, activation="relu"),
+    MaxPool2D(),
+    Conv2D(10, 3, activation="relu"),
+    MaxPool2D(),
+    Flatten(),
+    Dense(1, activation="sigmoid")
+])
+
+# If a convolutional layer finds features in an image, max pooling finds the most important parts of those features.
+# E.g. from every square four pixels, it chooses the max one, hence reducing the features to half.
+
+model_5.compile(loss="binary_crossentropy",
+                optimizer=Adam(),
+                metrics=["accuracy"])
+
+history_5 = model_5.fit(train_data,
+                        epochs=5,
+                        steps_per_epoch=len(train_data),
+                        validation_data=test_data,
+                        validation_steps=len(test_data))
+
+model_5.summary()
+
+plot_loss_curves(history_5)
+# Ideally, training and validation loss curves should be similar to each other, max pool has helped us get closer to that.
+# The curves looking similar means our model is performing just as well on the validation data as it is performing on the test data.
