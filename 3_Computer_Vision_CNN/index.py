@@ -430,3 +430,70 @@ model_5.summary()
 plot_loss_curves(history_5)
 # Ideally, training and validation loss curves should be similar to each other, max pool has helped us get closer to that.
 # The curves looking similar means our model is performing just as well on the validation data as it is performing on the test data.
+
+'''
+Data Augmentation
+It is the process of altering our training data, leading it to have more diversity and in turn allowing our models
+to learn more generalizable (hopefully) patterns.
+Altering might mean adjusting the rotation of an image, flipping it, cropping it, etc.
+Hence thanks to data augmentation, we can train our models better without collecting more data.
+
+Data augmentation is usually performed on the training data only.
+When we use ImageDataGenerator and it's built-in data augmentation parameters, our images are left as they are in the directories
+they are only modified as they're loaded into the model
+'''
+
+# Finding data augmentation
+
+# Create ImageDataGenerator training instance with data augmentation
+train_datagen_augmented = ImageDataGenerator(rescale=1/255.,
+                                             rotation_range=0.2, # How much do you want to rotate the image?
+                                             shear_range=0.2, # How much do you want to shear the image?
+                                             zoom_range=0.2, # Zoom in randomly on an image
+                                             width_shift_range=0.2, # Move the image around on the x-axis
+                                             height_shift_range=0.3, # Move the image around on the y-axis
+                                             horizontal_flip=True) # Do you want to flip an image?
+
+# Create ImageDataGenerator without data augmentation
+train_datagen = ImageDataGenerator(rescale=1/255.)
+test_datagen = ImageDataGenerator(rescale=1/255.)
+
+
+# Import data and augment it form training directory
+print("Augmented training data")
+train_data_augmented = train_datagen_augmented.flow_from_directory(directory=train_dir,
+                                                              target_size=(224, 224),
+                                                              batch_size=32,
+                                                              class_mode="binary",
+                                                              shuffle=False)
+
+# Create non-augmented train data batches
+print("Non-augmented training data")
+train_data = train_datagen.flow_from_directory(directory=train_dir,
+                                               target_size=(224, 224),
+                                               batch_size=32,
+                                               class_mode="binary",
+                                               shuffle=False)
+
+# Create non-augmented test data batches
+print("Non-augmented test data")
+test_data = test_datagen.flow_from_directory(directory=test_dir,
+                                             target_size=(224, 224),
+                                             batch_size=32,
+                                             class_mode="binary")
+
+# Visualize sample batches of augmented and non-augmented data
+# Note: Labels aren't augmented, only data (images)
+images, labels = next(train_data)
+augmented_images, augmented_labels = next(train_data_augmented)
+
+# Show original and augmented image
+import random
+random_number = random.randint(0, 32) # Since our batch size is 32
+plt.imshow(images[random_number])
+plt.title(f"Original image for {labels[random_number]}")
+plt.axis(False)
+plt.figure()
+plt.imshow(augmented_images[random_number])
+plt.title(f"Augmented image for {augmented_labels[random_number]}")
+plt.axis(False)
