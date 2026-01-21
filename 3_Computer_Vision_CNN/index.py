@@ -497,3 +497,36 @@ plt.figure()
 plt.imshow(augmented_images[random_number])
 plt.title(f"Augmented image for {augmented_labels[random_number]}")
 plt.axis(False)
+
+'''
+Notice how some of the augmented images look like slightly warped versions of the original image.
+This means our model will be forced to try and learn patterns in less-than-perfect images,
+which is often the case when using real-world images.
+'''
+
+# Training our model on the augmented data
+model_6 = Sequential([
+  Conv2D(10, 3, activation='relu', input_shape=(224, 224, 3)),
+  MaxPool2D(pool_size=2), # reduce number of features by half
+  Conv2D(10, 3, activation='relu'),
+  MaxPool2D(),
+  Conv2D(10, 3, activation='relu'),
+  MaxPool2D(),
+  Flatten(),
+  Dense(1, activation='sigmoid')
+])
+
+# Compile the model
+model_6.compile(loss='binary_crossentropy',
+                optimizer=Adam(),
+                metrics=['accuracy'])
+
+# Fit the model
+history_6 = model_6.fit(train_data_augmented,
+                        epochs=5,
+                        steps_per_epoch=len(train_data_augmented),
+                        validation_data=test_data,
+                        validation_steps=len(test_data))
+
+# Check model's performance
+plot_loss_curves(history_6)
