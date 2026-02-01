@@ -530,3 +530,33 @@ history_6 = model_6.fit(train_data_augmented,
 
 # Check model's performance
 plot_loss_curves(history_6)
+
+# Shuffling the data
+train_data_augmented_shuffled = train_datagen_augmented.flow_from_directory(directory=train_dir,
+                                                              target_size=(224, 224),
+                                                              batch_size=32,
+                                                              class_mode="binary",
+                                                              shuffle=True)
+
+model_7 = Sequential([
+    Conv2D(10, 3, activation="relu", input_shape=(224, 224, 3)),
+    MaxPool2D(), # pool_size=2 by default
+    Conv2D(10, 3, activation="relu"),
+    MaxPool2D(),
+    Conv2D(10, 3, activation="relu"),
+    MaxPool2D(),
+    Flatten(),
+    Dense(1, activation="sigmoid")
+])
+
+model_7.compile(loss="binary_crossentropy",
+                optimizer=Adam(),
+                metrics=["accuracy"])
+
+model_7.fit(train_data_augmented_shuffled,
+            epochs=5,
+            steps_per_epoch=len(train_data_augmented_shuffled),
+            validation_data=test_data,
+            validation_steps=len(test_data))
+
+plot_loss_curves(history_7)
