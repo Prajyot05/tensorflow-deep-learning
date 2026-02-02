@@ -560,3 +560,14 @@ model_7.fit(train_data_augmented_shuffled,
             validation_steps=len(test_data))
 
 plot_loss_curves(history_7)
+
+'''
+Now that we've beaten our baseline, here's how we can improve our model further:
+  1. Increase the number of Conv2D and MaxPool2D layers
+  2. Increase the number of filters in each convolutional layer
+  3. Train for longer (more epochs)
+  4. Find an ideal learning rate
+  5. Get more data
+  6. Use transfer learning to leverage what another image model has learned
+     and adjust it for our use case
+'''
