@@ -571,3 +571,47 @@ Now that we've beaten our baseline, here's how we can improve our model further:
   6. Use transfer learning to leverage what another image model has learned
      and adjust it for our use case
 '''
+
+# Making a prediction with our trained model on our own custom data
+# View our example image
+# !wget https://raw.githubusercontent.com/mrdbourke/tensorflow-deep-learning/main/images/03-steak.jpeg 
+steak = mpimg.imread("03-steak.jpeg")
+plt.imshow(steak)
+plt.axis(False)
+
+print(steak.shape)
+# The shape is not compatible with our model
+# Since our model takes in images of shapes (224, 224, 3), we've got to reshape our custom image to use it with our model.
+
+# Create a function to import an image and resize it to be able to be used with our model
+def load_and_prep_image(filename, img_shape=224):
+  """
+  Reads an image from filename, turns it into a tensor
+  and reshapes it to (img_shape, img_shape, colour_channel).
+  """
+
+  # Read in target file
+  img = tf.io.read_file(filename)
+
+  # Decode the read file into a tensor
+  img = tf.image.decode_image(img, channels=3) # (our model is trained on images with 3 colour channels and sometimes images have 4 colour channels)
+
+  # Resize the image (to the same size our model was trained on)
+  img = tf.image.resize(img, size = [img_shape, img_shape])
+
+  # Rescale the image (get all values between 0 and 1)
+  img = img/255.
+  return img
+
+# Load in and preprocess our custom image
+steak = load_and_prep_image("03-steak.jpeg")
+print(steak)
+
+'''
+Although our image is in the same shape as the images our model has been trained on, we're still missing a dimension.
+Our model was trained in batches, so the batch size becomes the first dimension.
+So in reality, our model was trained on data in the shape of (batch_size, 224, 224, 3).
+We can fix this by adding an extra to our custom image tensor using tf.expand_dims.
+'''
+model_7.predict(tf.expand_dims(steak, axis=0))
+# This gives us the prediction probability (how likely the image is to belong to one class or the other)
