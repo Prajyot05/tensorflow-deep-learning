@@ -644,3 +644,50 @@ def pred_and_plot(model, filename, class_names):
 
 # Testing our function
 pred_and_plot(model_7, "03-steak.jpeg", class_names)
+
+'''
+Multi-class Image Classification
+
+The steps remain the same:
+  1. Become one with the data
+  2. Preprocess the data (prepare it for a model)
+  3. Create a model (start with a baseline)
+  4. Fit the model (overfit it to make sure it works)
+     Overfitting is generally a good thing because it shows us that our model is learning something,
+     and it is generally very easy to get rid of.
+  5. Evaluate the model
+  6. Adjust different parameters and improve model (try to beat your baseline)
+  7. Repeat until satisfied
+'''
+
+# 1. Getting the data
+import zipfile
+
+# Download zip file of 10_food_classes images
+# !wget https://storage.googleapis.com/ztm_tf_course/food_vision/10_food_classes_all_data.zip 
+
+# Unzip the downloaded file
+zip_ref = zipfile.ZipFile("10_food_classes_all_data.zip", "r")
+zip_ref.extractall()
+zip_ref.close()
+
+import os
+
+# Walk through the directory
+for dirpath, dirnames, filenames in os.walk("10_food_classes_all_data"):
+  print(f"There are {len(dirnames)} directories and {len(filenames)} images in '{dirpath}'.")
+
+  import pathlib
+import numpy as np
+
+train_dir = "10_food_classes_all_data/train/"
+test_dir = "10_food_classes_all_data/test/"
+
+# Get the class names for our multi-class dataset (without using tensorflow)
+data_dir = pathlib.Path(train_dir)
+class_names = np.array(sorted([item.name for item in data_dir.glob('*')]))
+print(class_names)
+
+import random
+img = view_random_image(target_dir=train_dir,
+                        target_class=random.choice(class_names))
