@@ -691,3 +691,38 @@ print(class_names)
 import random
 img = view_random_image(target_dir=train_dir,
                         target_class=random.choice(class_names))
+
+# 2. Preprocess the data
+
+# Rescale the data and create data generator instances
+train_datagen = ImageDataGenerator(rescale=1/255.)
+test_datagen = ImageDataGenerator(rescale=1/255.)
+
+# Load data in from directories and turn it into batches
+train_data = train_datagen.flow_from_directory(train_dir,
+                                               target_size=(224, 224),
+                                               batch_size=32,
+                                               class_mode='categorical') # Since we're dealing with more than 2 classes
+
+test_data = train_datagen.flow_from_directory(test_dir,
+                                              target_size=(224, 224),
+                                              batch_size=32,
+                                              class_mode='categorical')
+
+# 3. Create a model
+
+model_8 = Sequential([
+  Conv2D(10, 3, activation='relu', input_shape=(224, 224, 3)),
+  Conv2D(10, 3, activation='relu'),
+  MaxPool2D(),
+  Conv2D(10, 3, activation='relu'),
+  Conv2D(10, 3, activation='relu'),
+  MaxPool2D(),
+  Flatten(),
+  Dense(10, activation='softmax') # Changed to have 10 neurons (same as number of classes) and 'softmax' activation
+])
+
+# Compile the model
+model_8.compile(loss="categorical_crossentropy", # Changed from 'binary_crossentropy' due to multi-class classification
+                optimizer=tf.keras.optimizers.Adam(),
+                metrics=["accuracy"])
