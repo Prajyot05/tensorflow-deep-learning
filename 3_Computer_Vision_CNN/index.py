@@ -726,3 +726,13 @@ model_8 = Sequential([
 model_8.compile(loss="categorical_crossentropy", # Changed from 'binary_crossentropy' due to multi-class classification
                 optimizer=tf.keras.optimizers.Adam(),
                 metrics=["accuracy"])
+
+# 4. Fit the model
+history_8 = model_8.fit(train_data, # now 10 different classes 
+                        epochs=5,
+                        steps_per_epoch=len(train_data),
+                        validation_data=test_data,
+                        validation_steps=len(test_data))
+
+plot_loss_curves(history_8)
+# The loss curves makes us realize that the model is overfitting on the training data
