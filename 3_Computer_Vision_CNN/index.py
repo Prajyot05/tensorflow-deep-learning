@@ -736,3 +736,123 @@ history_8 = model_8.fit(train_data, # now 10 different classes
 
 plot_loss_curves(history_8)
 # The loss curves makes us realize that the model is overfitting on the training data
+
+# 6. Adjust the model hyperparameters (to beat the baseline / reduce overfitting)
+'''
+Ways to reduce overfitting:
+  1. Get more data - Having more data gives the model more opportunities to learn patterns,
+                     patterns which may be more generalizable to new examples.
+  2. Simplify model - If the current model is already overfitting the training data,
+                      it may be too complicated of a model. This means it's learning the patterns of the data
+                      too well and isn't able to generalize well to unseen data. One way to simplify a model is 
+                      to reduce the number of layers it uses or to reduce the number of hidden units in each layer.
+  3. Use data augmentation - Data augmentation manipulates the training data in a way so that's harder for the model to learn
+                             as it artificially adds more variety to the data. If a model is able to learn patterns in augmented data,
+                             the model may be able to generalize better to unseen data.
+  4. Use transfer learning - Transfer learning involves leverages the patterns (also called pretrained weights)
+                             one model has learned to use as the foundation for your own task. In our case, we could use one computer vision 
+                             model pretrained on a large variety of images and then tweak it slightly to be more specialized for food images.
+'''
+
+# Trying a simplified model (removed two layers)
+model_9 = Sequential([
+  Conv2D(10, 3, activation='relu', input_shape=(224, 224, 3)),
+  MaxPool2D(),
+  Conv2D(10, 3, activation='relu'),
+  MaxPool2D(),
+  Flatten(),
+  Dense(10, activation='softmax')
+])
+
+model_9.compile(loss='categorical_crossentropy',
+                 optimizer=tf.keras.optimizers.Adam(),
+                 metrics=['accuracy'])
+
+history_9 = model_9.fit(train_data,
+                          epochs=5,
+                          steps_per_epoch=len(train_data),
+                          validation_data=test_data,
+                          validation_steps=len(test_data))
+
+# Check out the loss curves
+plot_loss_curves(history_9)
+
+# Trying to reduce overfitting using data augmentation
+train_datagen_augmented = ImageDataGenerator(rescale=1/255.,
+                                             rotation_range=20, # Note: this is an int not a float
+                                             width_shift_range=0.2,
+                                             height_shift_range=0.2,
+                                             zoom_range=0.2,
+                                             horizontal_flip=True)
+
+train_data_augmented = train_datagen_augmented.flow_from_directory(train_dir,
+                                                                  target_size=(224, 224),
+                                                                  batch_size=32,
+                                                                  class_mode='categorical')
+
+'''
+Cloning a model using Tensorflow
+Rather than rewriting the model from scratch, we can clone it using a function in TensorFlow called clone_model 
+which can take an existing model and rebuild it using the same architecture.
+The cloned version will not include any of the weights (patterns) the original model has learned.
+So when we train it, it'll be like training a model from scratch.
+'''
+
+model_10 = tf.keras.models.clone_model(model_9)
+
+model_10.compile(loss="categorical_crossentropy",
+              optimizer=tf.keras.optimizers.Adam(),
+              metrics=["accuracy"])
+
+# The epochs take a bit longer as the data is augmented on the fly, taking more compute power.
+history_10 = model_10.fit(train_data_augmented,
+                          epochs=5,
+                          steps_per_epoch=len(train_data_augmented),
+                          validation_data=test_data,
+                          validation_steps=len(test_data))
+
+plot_loss_curves(history_10)
+
+# Getting some custom images for model prediction
+# -q is for "quiet"
+# !wget -q https://raw.githubusercontent.com/mrdbourke/tensorflow-deep-learning/main/images/03-pizza-dad.jpeg
+# !wget -q https://raw.githubusercontent.com/mrdbourke/tensorflow-deep-learning/main/images/03-steak.jpeg
+# !wget -q https://raw.githubusercontent.com/mrdbourke/tensorflow-deep-learning/main/images/03-hamburger.jpeg
+# !wget -q https://raw.githubusercontent.com/mrdbourke/tensorflow-deep-learning/main/images/03-sushi.jpeg
+
+# Reconfig pred_and_plot function for multi-class
+
+def pred_and_plot(model, filename, class_names):
+  '''
+  Imports an image located at filename, makes a prediction on it with
+  a trained model and plots the image with the predicted class as the title.
+  '''
+  # Import the target image and preprocess it
+  img = load_and_prep_image(filename)
+
+  # Make a prediction and Get the predicted class
+  pred = model.predict(tf.expand_dims(img, axis=0))
+  if(len(pred[0]) > 1):
+    pred_class = class_names[tf.argmax(pred[0])] # If more than one output, take the max
+  else:
+    pred_class = class_names[int(tf.round(pred[0]))]
+
+  # Plot the image and predicted class
+  plt.imshow(img)
+  plt.title(f"Prediction: {pred_class}")
+  plt.axis(False)
+
+# Make a prediction
+pred_and_plot(model=model_10, 
+              filename="03-steak.jpeg", 
+              class_names=class_names)
+
+pred_and_plot(model_10, "03-sushi.jpeg", class_names)
+pred_and_plot(model_10, "03-pizza-dad.jpeg", class_names)
+
+# Saving our model
+model_10.save("saved_model_10.keras")
+
+# Loading the model
+loaded_model_10 = tf.keras.models.load_model('saved_model_10.keras')
+loaded_model_10.evaluate(test_data)
