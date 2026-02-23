@@ -53,3 +53,38 @@ test_data = train_datagen.flow_from_directory(test_dir,
                                               target_size=IMAGE_SHAPE,
                                               batch_size=BATCH_SIZE,
                                               class_mode="categorical")
+
+'''
+Setting up callbacks (utitlies to call while our model trains)
+Callbacks are extra functionality you can add to your models to be performed during or after training.
+
+Some of the more popular callbacks are:
+  1. Experiment tracking with TensorBoard - log the performance of multiple models and then view and compare these models
+     in a visual way on TensorBoard (a dashboard for inspecting neural network parameters).
+     Helpful to compare the results of different models on your data.
+
+  2. Model checkpointing - save your model as it trains so you can stop training if needed and come back to continue off where you left.
+     Helpful if training takes a long time and can't be done in one sitting.
+
+  3. Early stopping - leave your model training for an arbitrary amount of time
+     and have it stop training automatically when it ceases to improve.
+     Helpful when you've got a large dataset and don't know how long training will take.
+'''
+
+'''
+The TensorBoard callback
+It's main functionality is saving a model's training performance metrics to a specified logging directory.
+By default, logs are recorded every epoch using the update_freq='epoch' parameter.
+This is a good default since tracking model performance too often can slow down model training.
+
+We create a function for creating a TensorBoard callback because each model needs its own TensorBoard callback instance,
+so the function will create a new one each time it's run.
+'''
+import datetime
+import tensorflow as tf
+
+def create_tensorboard_callback(dir_name, experiment_name):
+    log_dir = dir_name + "/" + experiment_name + "/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir)
+    print(f"Saving TensorBoard log files to: {log_dir}")
+    return tensorboard_callback
