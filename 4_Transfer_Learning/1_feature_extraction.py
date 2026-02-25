@@ -7,6 +7,8 @@ There are two main benefits to using transfer learning:
   2. Can leverage a working neural network architecture which has already learned patterns on similar data to our own.
      Then we can adapt those patterns to our own data.
 '''
+import os
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 # To check if we are using a GPU
 # !nvidia-smi
@@ -137,3 +139,47 @@ resnet_model.summary() # The only trainable parameters is the ouput layer
 resnet_model.compile(loss="categorical_crossentropy",
                      optimizer=tf.keras.optimizers.Adam(),
                      metrics=["accuracy"])
+
+# Fitting our resnet model to the data
+resnet_history = resnet_model.fit(train_data_10_percent,
+                                  epochs=5,
+                                  steps_per_epoch=len(train_data_10_percent),
+                                  validation_data=test_data,
+                                  validation_steps=len(test_data),
+                                  # Add TensorBoard callback to model (callbacks parameter takes a list)
+                                  callbacks=[create_tensorboard_callback(dir_name="tensorflow_hub", # save experiment logs here
+                                                                         experiment_name="resnet50V2")]) # name of log files
+# The results are incredible (outperforms all models we've built till now, that too with quicker waiting times, and only 10% of our dataset)
+# Shows the advantage of using a prebuilt model instead of creating our own from scratch
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+def plot_loss_curves(history):
+  """
+  Returns separate loss curves for training and validation metrics.
+  """ 
+  loss = history.history['loss']
+  val_loss = history.history['val_loss']
+
+  accuracy = history.history['accuracy']
+  val_accuracy = history.history['val_accuracy']
+
+  epochs = range(len(history.history['loss']))
+
+  # Plot loss
+  plt.plot(epochs, loss, label='training_loss')
+  plt.plot(epochs, val_loss, label='val_loss')
+  plt.title('Loss')
+  plt.xlabel('Epochs')
+  plt.legend()
+
+  # Plot accuracy
+  plt.figure()
+  plt.plot(epochs, accuracy, label='training_accuracy')
+  plt.plot(epochs, val_accuracy, label='val_accuracy')
+  plt.title('Accuracy')
+  plt.xlabel('Epochs')
+  plt.legend()
+
+plot_loss_curves(resnet_history)
