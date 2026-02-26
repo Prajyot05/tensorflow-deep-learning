@@ -183,3 +183,24 @@ def plot_loss_curves(history):
   plt.legend()
 
 plot_loss_curves(resnet_history)
+
+# Create EfficientNet model
+efficientnet_model = create_model(model_url=efficientnet_url, # use EfficientNetB0 TensorFlow Hub URL
+                                  num_classes=train_data_10_percent.num_classes)
+
+# Compile
+efficientnet_model.compile(loss='categorical_crossentropy',
+                           optimizer=tf.keras.optimizers.Adam(),
+                           metrics=['accuracy'])
+
+# Fit
+efficientnet_history = efficientnet_model.fit(train_data_10_percent,
+                                              epochs=5,
+                                              steps_per_epoch=len(train_data_10_percent),
+                                              validation_data=test_data,
+                                              validation_steps=len(test_data),
+                                              callbacks=[create_tensorboard_callback(dir_name="tensorflow_hub", 
+                                                                                     # Track logs under different experiment name
+                                                                                     experiment_name="efficientnetB0")])
+
+plot_loss_curves(efficientnet_history)
