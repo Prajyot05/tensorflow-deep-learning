@@ -204,3 +204,34 @@ efficientnet_history = efficientnet_model.fit(train_data_10_percent,
                                                                                      experiment_name="efficientnetB0")])
 
 plot_loss_curves(efficientnet_history)
+
+efficientnet_model.summary()
+
+'''
+Different types of transfer learning:
+  1. "As is" transfer learning - when you take a pretrained model as it is and apply it to your task without any changes.
+
+  2. Feature extraction transfer learning - when you take the underlying patterns (also called weights)
+     a pretrained model has learned and adjust its outputs to be more suited to your problem.
+
+  3. Fine-tuning transfer learning is when you take the underlying patterns (also called weights) of a
+     pretrained model and adjust (fine-tune) them to your own problem.
+
+A common workflow is to "freeze" all of the learned patterns in the bottom layers of a pretrained model so they're untrainable.
+And then train the top 2-3 layers of so the pretrained model can adjust its outputs to your custom data (feature extraction).
+After you've trained the top 2-3 layers, you can then gradually "unfreeze" more and more layers and run
+the training process on your own data to further fine-tune the pretrained model.
+
+Why train only the top 2-3 layers in feature extraction?
+The lower a layer is in a computer vision model as in, the closer it is to the input layer, the larger the features it learn.
+For example, a bottom layer in a computer vision model to identify images of cats or dogs might learn the outline of legs, where as,
+layers closer to the output might learn the shape of teeth. Often, you'll want the larger features
+(learned patterns are also called features) to remain, since these are similar for both animals,
+where as, the differences remain in the more fine-grained features.
+'''
+
+# See layers in our model
+efficientnet_model.layers
+
+# See the amount of layers in the pretrained model
+len(efficientnet_model.layers[0].weights)
