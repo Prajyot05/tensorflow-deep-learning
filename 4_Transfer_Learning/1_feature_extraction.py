@@ -235,3 +235,86 @@ efficientnet_model.layers
 
 # See the amount of layers in the pretrained model
 len(efficientnet_model.layers[0].weights)
+
+'''
+Comparing our model results using TensorBoard
+Note: When uploading things to tensorboard.dev, your experiments are public.
+'''
+
+# %load_ext tensorboard
+# %tensorboard --logdir tensorflow_hub
+
+# Define a new log directory for these examples to keep them separate from previous model training logs
+log_dir_examples = "tensorboard_examples/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+summary_writer = tf.summary.create_file_writer(log_dir_examples)
+print(f"TensorBoard logs for these examples will be saved to: {log_dir_examples}")
+
+# To demonstrate scalar logging, let's simulate a simple training loop
+
+# Open the summary writer context to start logging
+with summary_writer.as_default():
+    # Iterate through a few 'epochs'
+    for epoch in range(5):
+        # Simulate some loss and accuracy values
+        simulated_loss = 1.0 / (epoch + 1)  # Loss decreases over time
+        simulated_accuracy = 0.5 + (epoch * 0.1)  # Accuracy increases over time
+
+        # Log the scalar values for 'loss' and 'accuracy' at each 'epoch'
+        # tf.summary.scalar() records a single numerical value at a given step (epoch)
+        tf.summary.scalar('simulated_loss', simulated_loss, step=epoch)
+        tf.summary.scalar('simulated_accuracy', simulated_accuracy, step=epoch)
+
+        print(f"Epoch {epoch}: Loss = {simulated_loss:.4f}, Accuracy = {simulated_accuracy:.4f}")
+
+print("Scalar logging complete.")
+
+# Note: When using `tf.keras.callbacks.TensorBoard` (as in previous cells), 
+# scalar logging for loss and metrics happens automatically.
+
+# Let's create a dummy image to log
+dummy_image = tf.random.uniform(shape=[1, 64, 64, 3], minval=0, maxval=255, dtype=tf.float32)
+
+# Open the summary writer context
+with summary_writer.as_default():
+    # Log the image
+    # tf.summary.image() records image data. The first dimension is typically batch size, 
+    # but for a single image, it's 1. Shape should be [batch_size, height, width, channels].
+    tf.summary.image("dummy_input_image", dummy_image, step=0)
+
+    # Let's simulate a processed image (e.g., after some augmentation or feature extraction)
+    processed_image = dummy_image * 0.8 + 50 # Simple modification
+    tf.summary.image("processed_image_example", processed_image, step=0)
+
+print("Image logging complete.")
+
+# For graph visualization, we need to log a `tf.keras.Model` or `tf.function`.
+
+# Let's define a simple Keras model
+def create_simple_model():
+    model = models.Sequential([
+        layers.Input(shape=(224, 224, 3)), # Define input shape explicitly
+        layers.Conv2D(32, (3, 3), activation='relu'),
+        layers.MaxPooling2D((2, 2)),
+        layers.Flatten(),
+        layers.Dense(10, activation='softmax')
+    ])
+    return model
+
+simple_model = create_simple_model()
+
+# Open the summary writer context
+with summary_writer.as_default():
+    # Log the Keras model graph
+    # To visualize the graph, TensorBoard needs to capture the operations when the model is called.
+    # This is typically done by calling the model with some dummy input data.
+    tf.summary.trace_on(graph=True, profiler=True) # Start tracing
+    _ = simple_model(tf.zeros((1, 224, 224, 3))) # Call the model with dummy input
+    tf.summary.trace_export(
+        name="simple_model_graph",
+        step=0,
+        profiler_outdir=log_dir_examples) # Export the trace to the log directory
+
+print("Model graph logging complete.")
+
+# Now, restart TensorBoard to see these new logs. You'll need to run the `tensorboard` magic command again.
+# Look for a new experiment directory named something like 'tensorboard_examples/YYYYMMDD-HHMMSS'.
