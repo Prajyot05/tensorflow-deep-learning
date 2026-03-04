@@ -66,3 +66,35 @@ train_data_10_percent.class_names
 # See an example batch of data
 for images, labels in train_data_10_percent.take(1):
   print(images, labels)
+
+'''
+Building a transfer learning model using the Keras Functional API
+
+We're going to go through the following steps:
+
+  1. Instantiate a pre-trained base model object by choosing a target model such as EfficientNetV2B0
+     from tf.keras.applications.efficientnet_v2, setting the include_top parameter to False
+     (we do this because we're going to create our own top, which are the output layers for the model).
+
+  2. Set the base model's trainable attribute to False to freeze all of the weights in the pre-trained model.
+
+  3. Define an input layer for our model, for example, what shape of data should our model expect?
+
+  4. [Optional] Normalize the inputs to our model if it requires. Some computer vision models such as ResNetV250 require their
+     inputs to be between 0 & 1.
+
+  5. Pass the inputs to the base model.
+
+  6. Pool the outputs of the base model into a shape compatible with the output activation layer
+     (turn base model output tensors into same shape as label tensors).
+     This can be done using tf.keras.layers.GlobalAveragePooling2D() or tf.keras.layers.GlobalMaxPooling2D()
+     though the former is more common in practice.
+
+  7. Create an output activation layer using tf.keras.layers.Dense() with the appropriate activation function and number of neurons.
+
+  8. Combine the inputs and outputs layer into a model using tf.keras.Model().
+
+  9. Compile the model using the appropriate loss function and choose of optimizer.
+  
+  10. Fit the model for desired number of epochs and with necessary callbacks (in our case, we'll start off with the TensorBoard callback).
+'''
