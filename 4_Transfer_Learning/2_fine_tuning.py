@@ -98,3 +98,57 @@ We're going to go through the following steps:
   
   10. Fit the model for desired number of epochs and with necessary callbacks (in our case, we'll start off with the TensorBoard callback).
 '''
+
+# 1. Create base model with tf.keras.applications
+# We're not including top layer because we want to add our own dense layer on top
+# This is because by default it has 1000 layers (due to it being trained on ImageNet) but we want 10 (= number of classes)
+base_model = tf.keras.applications.efficientnet_v2.EfficientNetV2B0(include_top=False)
+
+# 2. Freeze the base model (so the pre-learned patterns remain)
+base_model.trainable = False
+
+# 3. Create inputs into the base model
+inputs = tf.keras.layers.Input(shape=(224, 224, 3), name="input_layer")
+
+# 4. Pass the inputs to the base_model (note: using tf.keras.applications, EfficientNetV2 inputs don't have to be normalized)
+x = base_model(inputs)
+# Check data shape after passing it to base_model
+print(f"Shape after base_model: {x.shape}")
+
+# 6. Average pool the outputs of the base model (aggregate all the most important information, reduce number of computations)
+x = tf.keras.layers.GlobalAveragePooling2D(name="global_average_pooling_layer")(x)
+print(f"After GlobalAveragePooling2D(): {x.shape}")
+
+# 7. Create the output activation layer
+outputs = tf.keras.layers.Dense(10, activation="softmax", name="output_layer")(x)
+
+# 8. Combine the inputs with the outputs into a model
+model_0 = tf.keras.Model(inputs, outputs)
+
+# 9. Compile the model
+model_0.compile(loss='categorical_crossentropy',
+              optimizer=tf.keras.optimizers.Adam(),
+              metrics=["accuracy"])
+
+# 10. Fit the model (we use less steps for validation so it's faster)
+history_0 = model_0.fit(train_data_10_percent,
+                                 epochs=5,
+                                 steps_per_epoch=len(train_data_10_percent),
+                                 validation_data=test_data_10_percent,
+                                 validation_steps=int(0.25 * len(test_data_10_percent)), # Go through 25% of the validation data so epochs are faster
+                                 callbacks=[create_tensorboard_callback("transfer_learning", "10_percent_feature_extract")]) # Track our model's training logs for visualization later
+
+'''
+The kind of transfer learning we used above is called feature extraction transfer learning,
+We passed our custom data to an already pre-trained model (EfficientNetV2B0), asked it "what patterns do you see?"
+and then put our own output layer on top to make sure the outputs were tailored to our desired number of classes.
+'''
+
+# Check layers in our base model
+for layer_number, layer in enumerate(base_model.layers):
+  print(layer_number, layer.name)
+
+base_model.summary()
+# It would have been very time-consuming to manually create so many layers ourselves, that is why transfer learning is preffered.
+model_0.summary()
+plot_loss_curves(history_0)
