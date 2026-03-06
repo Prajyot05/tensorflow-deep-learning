@@ -152,3 +152,35 @@ base_model.summary()
 # It would have been very time-consuming to manually create so many layers ourselves, that is why transfer learning is preffered.
 model_0.summary()
 plot_loss_curves(history_0)
+
+'''
+Getting a feature vector from a trained model
+
+What does the tf.keras.layers.GlobalAveragePooling2D() layer do?
+It transforms a 4D tensor into a 2D tensor by averaging the values across the inner-axes.
+'''
+
+# Define input tensor shape (same number of dimensions as the output of efficientnetv2-b0)
+input_shape = (1, 4, 4, 3)
+
+# Create a random tensor
+tf.random.set_seed(42)
+input_tensor = tf.random.normal(input_shape)
+print(f"Random input tensor:\n {input_tensor}\n")
+
+# Pass the random tensor through a global average pooling 2D layer
+global_average_pooled_tensor = tf.keras.layers.GlobalAveragePooling2D()(input_tensor)
+print(f"2D global average pooled random tensor:\n {global_average_pooled_tensor}\n")
+
+# Check the shapes of the different tensors
+print(f"Shape of input tensor: {input_tensor.shape}")
+print(f"Shape of 2D global averaged pooled input tensor: {global_average_pooled_tensor.shape}")
+
+# This is the same as GlobalAveragePooling2D()
+tf.reduce_mean(input_tensor, axis=[1, 2]) # average across the middle axes
+
+'''
+Doing this not only makes the output of the base model compatible with the input shape
+requirement of our output layer (tf.keras.layers.Dense()), it also condenses the information
+found by the base model into a lower dimension feature vector.
+'''
