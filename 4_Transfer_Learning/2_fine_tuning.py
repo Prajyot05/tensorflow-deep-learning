@@ -184,3 +184,37 @@ Doing this not only makes the output of the base model compatible with the input
 requirement of our output layer (tf.keras.layers.Dense()), it also condenses the information
 found by the base model into a lower dimension feature vector.
 '''
+
+'''
+What is a feature vector?
+It is a learned representation of the input data
+(a compressed form of the input data based on how the model sees it)
+'''
+
+'''
+Running different transfer learning experiments:
+  1. Model 1: Use feature extraction transfer learning on 1% of the training data with data augmentation.
+  2. Model 2: Use feature extraction transfer learning on 10% of the training data with data augmentation
+     and save the results to a checkpoint.
+  3. Model 3: Fine-tune the Model 2 checkpoint on 10% of the training data with data augmentation.
+  4. Model 4: Fine-tune the Model 2 checkpoint on 100% of the training data with data augmentation.
+'''
+
+# Download and unzip data
+# !wget https://storage.googleapis.com/ztm_tf_course/food_vision/10_food_classes_1_percent.zip
+unzip_data("10_food_classes_1_percent.zip")
+
+# Create training and test dirs
+train_dir_1_percent = "10_food_classes_1_percent/train/"
+test_dir = "10_food_classes_1_percent/test/"
+
+walk_through_dir("10_food_classes_1_percent")
+
+IMG_SIZE = (224, 224)
+train_data_1_percent = tf.keras.preprocessing.image_dataset_from_directory(train_dir_1_percent,
+                                                                           label_mode="categorical",
+                                                                           batch_size=32, # default
+                                                                           image_size=IMG_SIZE)
+test_data = tf.keras.preprocessing.image_dataset_from_directory(test_dir,
+                                                                label_mode="categorical",
+                                                                image_size=IMG_SIZE)
