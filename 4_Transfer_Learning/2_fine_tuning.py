@@ -218,3 +218,25 @@ train_data_1_percent = tf.keras.preprocessing.image_dataset_from_directory(train
 test_data = tf.keras.preprocessing.image_dataset_from_directory(test_dir,
                                                                 label_mode="categorical",
                                                                 image_size=IMG_SIZE)
+
+'''
+Using Data Augmentation while feeding the data to the model using preprocessing layers
+Adding a data augmentation layer to the model has the following benefits:
+
+  1. Preprocessing of the images (augmenting them) happens on the GPU rather than on the CPU (much faster).
+  2. Images are best preprocessed on the GPU where as text and structured data are more suited to be preprocessed on the CPU.
+  3. Image data augmentation only happens during training so we can still export our whole model and use it elsewhere.
+     And if someone else wanted to train the same model as us, including the same kind of data augmentation, they could.
+'''
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+data_augmentation = keras.Sequential([
+  layers.RandomFlip("horizontal"),
+  layers.RandomRotation(0.2),
+  layers.RandomZoom(0.2),
+  layers.RandomHeight(0.2),
+  layers.RandomWidth(0.2),
+  # No need to to Rescaling for EfficientNetV2B0 as it has it built-in
+], name ="data_augmentation")
