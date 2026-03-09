@@ -240,3 +240,25 @@ data_augmentation = keras.Sequential([
   layers.RandomWidth(0.2),
   # No need to to Rescaling for EfficientNetV2B0 as it has it built-in
 ], name ="data_augmentation")
+
+# View a random image
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import os
+import random
+
+target_class = random.choice(train_data_1_percent.class_names) # choose a random class
+target_dir = "10_food_classes_1_percent/train/" + target_class # create the target directory
+random_image = random.choice(os.listdir(target_dir)) # choose a random image from target directory
+random_image_path = target_dir + "/" + random_image # create the choosen random image path
+img = mpimg.imread(random_image_path) # read in the chosen target image
+plt.imshow(img) # plot the target image
+plt.title(f"Original random image from class: {target_class}")
+plt.axis(False); # turn off the axes
+
+# Augment the image
+augmented_img = data_augmentation(tf.expand_dims(img, axis=0)) # data augmentation model requires shape (None, height, width, 3)
+plt.figure()
+plt.imshow(tf.squeeze(augmented_img)/255.) # requires normalization after augmentation
+plt.title(f"Augmented random image from class: {target_class}")
+plt.axis(False);
