@@ -261,4 +261,52 @@ augmented_img = data_augmentation(tf.expand_dims(img, axis=0)) # data augmentati
 plt.figure()
 plt.imshow(tf.squeeze(augmented_img)/255.) # requires normalization after augmentation
 plt.title(f"Augmented random image from class: {target_class}")
-plt.axis(False);
+plt.axis(False)
+
+# Feature extraction transfer learning
+# Setup input shape and base model, freezing the base model layers
+input_shape = (224, 224, 3)
+base_model = tf.keras.applications.efficientnet_v2.EfficientNetV2B0(include_top=False)
+base_model.trainable = False
+
+# Create input layer
+inputs = layers.Input(shape=input_shape, name="input_layer")
+
+# Add in data augmentation Sequential model as a layer
+x = data_augmentation(inputs)
+
+# Give base_model inputs (after augmentation) and don't train it
+x = base_model(x, training=False)
+
+# Pool output features of base model
+x = layers.GlobalAveragePooling2D(name="global_average_pooling_layer")(x)
+
+# Put a dense layer on as the output
+outputs = layers.Dense(10, activation="softmax", name="output_layer")(x)
+
+# Make a model with inputs and outputs
+model_1 = keras.Model(inputs, outputs)
+
+# Compile the model
+model_1.compile(loss="categorical_crossentropy",
+              optimizer=tf.keras.optimizers.Adam(),
+              metrics=["accuracy"])
+
+# Fit the model
+history_1_percent = model_1.fit(train_data_1_percent,
+                    epochs=5,
+                    steps_per_epoch=len(train_data_1_percent),
+                    validation_data=test_data,
+                    validation_steps=int(0.25* len(test_data)), # validate for less steps
+                    # Track model training logs
+                    callbacks=[create_tensorboard_callback("transfer_learning", "1_percent_data_aug")])
+
+# Check out model summary
+model_1.summary()
+
+# Evaluate on the test data
+results_1_percent_data_aug = model_1.evaluate(test_data)
+results_1_percent_data_aug
+
+# How does the model go with a data augmentation layer with 1% of data
+plot_loss_curves(history_1_percent)
