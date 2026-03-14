@@ -233,6 +233,7 @@ from tensorflow import keras
 from tensorflow.keras import layers
 
 data_augmentation = keras.Sequential([
+  keras.Input(shape=(224, 224, 3)),
   layers.RandomFlip("horizontal"),
   layers.RandomRotation(0.2),
   layers.RandomZoom(0.2),
