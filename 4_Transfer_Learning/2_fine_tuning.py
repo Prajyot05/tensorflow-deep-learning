@@ -311,3 +311,52 @@ results_1_percent_data_aug
 
 # How does the model go with a data augmentation layer with 1% of data
 plot_loss_curves(history_1_percent)
+
+# Model 2: Feature extraction transfer learning with 10% of data and data augmentation
+
+train_dir_10_percent = "10_food_classes_10_percent/train/"
+test_dir = "10_food_classes_10_percent/test/"
+
+# Setup data inputs
+import tensorflow as tf
+
+IMG_SIZE = (224, 224)
+train_data_10_percent = tf.keras.preprocessing.image_dataset_from_directory(train_dir_10_percent,
+                                                                            label_mode="categorical",
+                                                                            image_size=IMG_SIZE)
+# Note: the test data is the same as the previous experiment, we could
+test_data = tf.keras.preprocessing.image_dataset_from_directory(test_dir,
+                                                                label_mode="categorical",
+                                                                image_size=IMG_SIZE)
+
+# Create model 2 with data augmentation built-in
+from tensorflow import keras
+from keras import layers
+from keras.models import Sequential
+
+data_augmentation = keras.Sequential([
+  layers.RandomFlip("horizontal"),
+  layers.RandomRotation(0.2),
+  layers.RandomZoom(0.2), # This handles both height and width zooming now!
+  # preprocessing.Rescaling(1./255) # keep for ResNet50V2, remove for EfficientNet
+], name ="data_augmentation")
+
+# Setup the input shape to our model
+input_shape = (224, 224, 3)
+
+# Create a frozen base model (also called the backbone)
+base_model = tf.keras.applications.efficientnet_v2.EfficientNetV2B0(include_top=False)
+base_model.trainable = False
+
+# Create input and output layers (including the layers in between)
+inputs = layers.Input(shape=input_shape, name="input_layer") # create input layer
+x = data_augmentation(inputs) # augment our training images
+x = base_model(x, training=False) # pass augmented images to base model but keep it in inference mode, so batchnorm layers don't get updated
+x = layers.GlobalAveragePooling2D(name="global_average_pooling_layer")(x)
+outputs = layers.Dense(10, activation="softmax", name="output_layer")(x)
+model_2 = tf.keras.Model(inputs, outputs)
+
+# Compile
+model_2.compile(loss="categorical_crossentropy",
+              optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), # use Adam optimizer with base learning rate
+              metrics=["accuracy"])
