@@ -360,3 +360,26 @@ model_2 = tf.keras.Model(inputs, outputs)
 model_2.compile(loss="categorical_crossentropy",
               optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), # use Adam optimizer with base learning rate
               metrics=["accuracy"])
+
+'''
+The ModelCheckpoint callback
+It gives you the ability to save your model,
+as a whole in the SavedModel format or the weights (patterns) only to a specified directory as it trains.
+
+What's the difference between saving the entire model (SavedModel format) and saving the weights only?
+The SavedModel format saves a model's architecture, weights and training configuration all in one folder.
+It makes it very easy to reload your model exactly how it is elsewhere. However, if you do not want to share all
+of these details with others, you may want to save and share the weights only
+(these will just be large tensors of non-human interpretable numbers).
+If disk space is an issue, saving the weights only is faster and takes up less space than saving the whole model.
+'''
+
+# Setup checkpoint path
+checkpoint_path = "ten_percent_model_checkpoints_weights/checkpoint.weights.h5"
+
+# Create a ModelCheckpoint callback that saves the model's weights only
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
+                                                         save_weights_only=True, # set to False to save the entire model
+                                                         save_best_only=True, # save only the best model weights instead of a model every epoch
+                                                         save_freq="epoch", # save every epoch
+                                                         verbose=1)
