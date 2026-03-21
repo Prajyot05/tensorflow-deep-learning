@@ -383,3 +383,16 @@ checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_pat
                                                          save_best_only=True, # save only the best model weights instead of a model every epoch
                                                          save_freq="epoch", # save every epoch
                                                          verbose=1)
+
+# Fit the model saving checkpoints every epoch
+initial_epochs = 5
+history_10_percent_data_aug = model_2.fit(train_data_10_percent,
+                                          epochs=initial_epochs,
+                                          validation_data=test_data,
+                                          validation_steps=int(0.25 * len(test_data)), # do less steps per validation (quicker)
+                                          callbacks=[create_tensorboard_callback("transfer_learning", "10_percent_data_aug"),
+                                                     checkpoint_callback])
+
+# Evaluate on the test data
+results_10_percent_data_aug = model_2.evaluate(test_data)
+results_10_percent_data_aug
