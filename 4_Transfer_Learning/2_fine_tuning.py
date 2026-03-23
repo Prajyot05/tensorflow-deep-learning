@@ -396,3 +396,15 @@ history_10_percent_data_aug = model_2.fit(train_data_10_percent,
 # Evaluate on the test data
 results_10_percent_data_aug = model_2.evaluate(test_data)
 results_10_percent_data_aug
+
+# Loading in checkpointed weights
+model_2.load_weights(checkpoint_path)
+loaded_weights_model_results = model_2.evaluate(test_data)
+
+# If the results from our native model and the loaded weights are the same, this should output True
+# It will not return True because of the way computers store tiny decimal numbers, but they are still very close
+results_10_percent_data_aug == loaded_weights_model_results
+
+import numpy as np
+# Check to see if loaded model results are very close to native model results
+np.isclose(np.array(results_10_percent_data_aug), np.array(loaded_weights_model_results))
