@@ -408,3 +408,19 @@ results_10_percent_data_aug == loaded_weights_model_results
 import numpy as np
 # Check to see if loaded model results are very close to native model results
 np.isclose(np.array(results_10_percent_data_aug), np.array(loaded_weights_model_results))
+
+'''
+Model 3: Fine-tuning an existing model on 10% of the data
+
+High-level example of fine-tuning an EfficientNet model:
+  Bottom layers (layers closer to the input data) stay frozen
+  where as top layers (layers closer to the output data) are updated during training.
+
+Uptil now all of the layers in the base model (EfficientNetV2B0) were frozen during training.
+Now we're going to switch to fine-tuning transfer learning. This means we'll be using the same base model except we'll be unfreezing
+some of its layers (ones closest to the top) and running the model for a few more epochs.
+
+The idea with fine-tuning is to start customizing the pre-trained model more to our own data.
+
+Note: Fine-tuning usually works best after training a feature extraction model for a few epochs and with large amounts of data.
+'''
