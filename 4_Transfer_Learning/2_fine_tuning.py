@@ -424,3 +424,12 @@ The idea with fine-tuning is to start customizing the pre-trained model more to 
 
 Note: Fine-tuning usually works best after training a feature extraction model for a few epochs and with large amounts of data.
 '''
+
+# Layers in loaded model
+model_2.layers
+
+for layer_number, layer in enumerate(model_2.layers):
+  print(f"Layer number: {layer_number} | Layer name: {layer.name} | Layer type: {layer} | Trainable? {layer.trainable}")
+     
+
+model_2.summary()
