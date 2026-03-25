@@ -433,3 +433,43 @@ for layer_number, layer in enumerate(model_2.layers):
      
 
 model_2.summary()
+
+# Access the base_model layers of model_2
+model_2_base_model = model_2.layers[2]
+model_2_base_model.name
+     
+# How many layers are trainable in our model_2_base_model?
+print(len(model_2_base_model.trainable_variables)) # layer at index 2 is the EfficientNetV2B0 layer (the base model)
+
+# Check which layers are tuneable (trainable)
+for layer_number, layer in enumerate(model_2_base_model.layers):
+  print(layer_number, layer.name, layer.trainable)
+
+'''
+Now to fine-tune the base model to our own data, we're going to unfreeze the top 10 layers
+and continue training our model for another 5 epochs.
+
+How many layers should you unfreeze when training?
+Generally, the less data you have, the less layers you want to unfreeze and the more gradually you want to fine-tune.
+'''
+
+# Make all the layers in model_2_base_model trainable
+model_2_base_model.trainable = True
+
+# Freeze all layers except for the last 10
+for layer in model_2_base_model.layers[:-10]:
+  layer.trainable = False
+
+# Recompile the whole model (always recompile after any adjustments to a model)
+model_2.compile(loss="categorical_crossentropy",
+                optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), # lr is 10x lower than before for fine-tuning (rule of thumb)
+                metrics=["accuracy"])
+
+# Check which layers are tuneable (trainable)
+for layer_number, layer in enumerate(model_2_base_model.layers):
+  print(layer_number, layer.name, layer.trainable)
+
+# How many trainable variables do we have now?
+print(len(model_2.trainable_variables))
+# The model has a total of 12 trainable variables, the last 10 layers of the base model and the weight and bias parameters
+# of the Dense output layer.
