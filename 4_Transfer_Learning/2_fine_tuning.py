@@ -473,3 +473,21 @@ for layer_number, layer in enumerate(model_2_base_model.layers):
 print(len(model_2.trainable_variables))
 # The model has a total of 12 trainable variables, the last 10 layers of the base model and the weight and bias parameters
 # of the Dense output layer.
+
+# Fine tune for another 5 epochs
+fine_tune_epochs = initial_epochs + 5
+
+# Refit the model (same as model_2 except with more trainable layers)
+history_fine_10_percent_data_aug = model_2.fit(train_data_10_percent,
+                                               epochs=fine_tune_epochs,
+                                               validation_data=test_data,
+                                               initial_epoch=history_10_percent_data_aug.epoch[-1], # start from previous last epoch
+                                               validation_steps=int(0.25 * len(test_data)),
+                                               callbacks=[create_tensorboard_callback("transfer_learning", "10_percent_fine_tune_last_10")])
+
+'''
+Note: Fine-tuning usually takes far longer per epoch than feature extraction (due to updating more weights throughout a network).
+'''
+
+# Evaluate the model on the test data
+results_fine_tune_10_percent = model_2.evaluate(test_data)
