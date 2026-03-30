@@ -533,3 +533,30 @@ def compare_historys(original_history, new_history, initial_epochs=5):
 
 # Compare the histories of our feature extraction model and fine-tuned model
 compare_historys(history_10_percent_data_aug, history_fine_10_percent_data_aug, initial_epochs=5)
+
+'''
+Model 4: Fine-tuning an existing model all of the data
+'''
+
+# Download and unzip 10 classes of data with all images
+# !wget https://storage.googleapis.com/ztm_tf_course/food_vision/10_food_classes_all_data.zip
+unzip_data("10_food_classes_all_data.zip")
+
+# Setup data directories
+train_dir = "10_food_classes_all_data/train/"
+test_dir = "10_food_classes_all_data/test/"
+
+# How many images are we working with now?
+walk_through_dir("10_food_classes_all_data")
+
+# Turn the images into tensors datasets.
+import tensorflow as tf
+IMG_SIZE = (224, 224)
+train_data_10_classes_full = tf.keras.preprocessing.image_dataset_from_directory(train_dir,
+                                                                                 label_mode="categorical",
+                                                                                 image_size=IMG_SIZE)
+
+# Note: this is the same test dataset we've been using for the previous modelling experiments
+test_data = tf.keras.preprocessing.image_dataset_from_directory(test_dir,
+                                                                label_mode="categorical",
+                                                                image_size=IMG_SIZE)
