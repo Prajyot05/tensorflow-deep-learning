@@ -560,3 +560,71 @@ train_data_10_classes_full = tf.keras.preprocessing.image_dataset_from_directory
 test_data = tf.keras.preprocessing.image_dataset_from_directory(test_dir,
                                                                 label_mode="categorical",
                                                                 image_size=IMG_SIZE)
+
+def create_base_model(input_shape: tuple[int, int, int] = (224, 224, 3),
+                      output_shape: int = 10,
+                      learning_rate: float = 0.001,
+                      training: bool = False) -> tf.keras.Model:
+    """
+    Create a model based on EfficientNetV2B0 with built-in data augmentation.
+
+    Parameters:
+    - input_shape (tuple): Expected shape of input images. Default is (224, 224, 3).
+    - output_shape (int): Number of classes for the output layer. Default is 10.
+    - learning_rate (float): Learning rate for the Adam optimizer. Default is 0.001.
+    - training (bool): Whether the base model is trainable. Default is False.
+
+    Returns:
+    - tf.keras.Model: The compiled model with specified input and output settings.
+    """
+
+    # Create base model
+    base_model = tf.keras.applications.efficientnet_v2.EfficientNetV2B0(include_top=False)
+    base_model.trainable = training
+
+    # Setup model input and outputs with data augmentation built-in
+    inputs = layers.Input(shape=input_shape, name="input_layer")
+    x = data_augmentation(inputs)
+    x = base_model(x, training=False)  # pass augmented images to base model but keep it in inference mode
+    x = layers.GlobalAveragePooling2D(name="global_average_pooling_layer")(x)
+    outputs = layers.Dense(units=output_shape, activation="softmax", name="output_layer")(x)
+    model = tf.keras.Model(inputs, outputs)
+
+    # Compile model
+    model.compile(loss="categorical_crossentropy",
+                  optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+                  metrics=["accuracy"])
+
+    return model
+
+'''
+Previous Experiment - model_2 with 10 layers fine-tuned for 5 more epochs on 10% of the data.
+This Experiment - model_2 with layers fined-tuned for 5 more epochs on 100% on the data.
+'''
+# Create a new instance of model_2
+model_2 = create_base_model(learning_rate=0.0001) # 10x lower learning rate for fine-tuning
+
+# Load previously checkpointed weights
+model_2.load_weights(checkpoint_path)
+
+model_2.summary()
+
+# After loading the weights, this should have gone down (no fine-tuning)
+model_2.evaluate(test_data)
+
+'''
+The steps we have done so far:
+  1. Trained a feature extraction transfer learning model for 5 epochs on 10% of the data
+     (with all base model layers frozen) and saved the model's weights using ModelCheckpoint (Model 2).
+
+  2. Fine-tuned the same model on the same 10% of the data for a further 5 epochs with the top 10 layers of
+     the base model unfrozen (Model 3).
+
+  3. Saved the results and training logs each time.
+
+  4. Reloaded the model from 1 to do the same steps as 2 but with all (100%) of the data (Model 4).
+'''
+
+# Check which layers are tuneable in the whole model
+for layer_number, layer in enumerate(model_2.layers):
+  print(layer_number, layer.name, layer.trainable)
