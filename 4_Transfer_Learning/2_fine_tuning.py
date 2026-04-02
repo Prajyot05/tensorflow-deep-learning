@@ -628,3 +628,26 @@ The steps we have done so far:
 # Check which layers are tuneable in the whole model
 for layer_number, layer in enumerate(model_2.layers):
   print(layer_number, layer.name, layer.trainable)
+
+# Recompile the model (always recompile after any adjustments to a model)
+model_2.compile(loss="categorical_crossentropy",
+                optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001), # lr is 10x lower than before for fine-tuning
+                metrics=["accuracy"])
+
+# Continue to train and fine-tune the model to our data
+fine_tune_epochs = initial_epochs + 5
+
+history_fine_10_classes_full = model_2.fit(train_data_10_classes_full,
+                                           epochs=fine_tune_epochs,
+                                           initial_epoch=history_10_percent_data_aug.epoch[-1],
+                                           validation_data=test_data,
+                                           validation_steps=int(0.25 * len(test_data)),
+                                           callbacks=[create_tensorboard_callback("transfer_learning", "full_10_classes_fine_tune_last_10")])
+
+results_fine_tune_full_data = model_2.evaluate(test_data)
+results_fine_tune_full_data
+
+# How did fine-tuning go with more data?
+compare_historys(original_history=history_10_percent_data_aug,
+                 new_history=history_fine_10_classes_full,
+                 initial_epochs=5)
