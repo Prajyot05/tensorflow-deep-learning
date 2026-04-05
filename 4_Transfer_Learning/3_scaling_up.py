@@ -33,3 +33,29 @@ test_data = tf.keras.preprocessing.image_dataset_from_directory(test_dir,
                                                                 label_mode="categorical",
                                                                 image_size=IMG_SIZE,
                                                                 shuffle=False) # we're not shuffling because we want to use the order later
+
+'''
+Train a model with transfer learning on 10% of 101 food classes
+The steps we will follow: 
+  1. Create a ModelCheckpoint callback to save our progress during training, this means we could experiment
+     with further training later without having to train from scratch every time.
+
+  2. Create a Data augmentation layer right into the model.
+
+  3. Build a headless (no top layers) EfficientNetB0 architecture from tf.keras.applications as our base model.
+
+  4. Build a Dense layer with 101 hidden neurons (same as number of food classes) and softmax activation as the output layer.
+
+  5. Use Categorical crossentropy as the loss function since we're dealing with more than two classes.
+
+  6. Use the Adam optimizer with the default settings.
+
+  7. Fit for 5 full passes on the training data while evaluating on 15% of the test data.
+'''
+
+# Create checkpoint callback to save model for later use
+checkpoint_path = "101_classes_10_percent_data_model_checkpoint.weights.h5"
+checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(checkpoint_path,
+                                                         save_weights_only=True, # save only the model weights
+                                                         monitor="val_accuracy", # save the model weights which score the best validation accuracy
+                                                         save_best_only=True) # only keep the best model weights on file (delete the rest)
